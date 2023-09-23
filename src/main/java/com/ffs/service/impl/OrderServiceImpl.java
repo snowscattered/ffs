@@ -71,7 +71,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public int updOrder(Order order) {
         int state = order.state == null ? -1 : order.state.ordinal();
-
         try {
             return orderMapper.updateOrder(order, state);
         } catch (Exception e) {

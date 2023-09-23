@@ -42,6 +42,6 @@ public interface ReviewMapper {
             + "</script>")
     int updateReview(Review review);
 
-    @Delete("update review set del=1 where del=0 and rid=#{rid}")
+    @Update("update review set del=1 where del=0 and rid=#{rid}")
     int deleteReview(int rid);
 }
