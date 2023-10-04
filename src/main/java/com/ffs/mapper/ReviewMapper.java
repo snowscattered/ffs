@@ -8,25 +8,26 @@ import java.util.List;
 /**
  * review 表的增删改查
  * 伪删除使用
+ * 1.1中 pid 字段更变为 uid
  * @author hoshinosena
- * @version 1.0
+ * @version 1.1
  */
 @Mapper
 public interface ReviewMapper {
     @Select("select * from review where del=0 and rid=#{rid}")
     Review selectReviewByRid(int rid);
 
-    @Select("select * from review where del=0 and oid=#{oid} and pid=#{pid}")
-    Review selectReviewByOP(int oid, int pid);
+    @Select("select * from review where del=0 and oid=#{oid} and uid=#{uid}")
+    Review selectReviewByOU(int oid, int uid);
 
-    @Select("select * from review where del=0 and pid=#{pid} order by rid desc")
-    List<Review> selectReviewsByPid(int pid);
+    @Select("select * from review where del=0 and uid=#{uid} order by rid desc")
+    List<Review> selectReviewsByUid(int uid);
 
     @Select("select * from review where del=0 order by rid desc")
     List<Review> selectReviews();
 
-    @Insert("insert into review(oid,pid,score,detail,date,del) "
-            + "values(#{oid},#{pid},#{score},#{detail},#{date},0)")
+    @Insert("insert into review(oid,uid,score,detail,date,del) "
+            + "values(#{oid},#{uid},#{score},#{detail},#{date},0)")
     int insertReview(Review review);
 
     @Update("<script>"

@@ -8,7 +8,7 @@ import java.util.List;
  * ReviewService 封装了代理类 ReviewMapper
  * 并在执行相应方法前进行数据检查确保返回值是预期的
  * @author hoshinosena
- * @version 1.0
+ * @version 1.1
  */
 public interface ReviewService {
     /**
@@ -20,21 +20,21 @@ public interface ReviewService {
     Review findReview(int rid);
 
     /**
-     * 透过 oid 和 pid 查找 review
+     * 透过 oid 和 uid 查找 review
      * @param oid order 的 oid 字段
-     * @param pid product 的 pid 字段
+     * @param uid user 的 uid 字段
      * @return null 或 review 引用
      * @author hoshinosena
      */
-    Review findReview(int oid, int pid);
+    Review findReview(int oid, int uid);
 
     /**
-     * 透过 pid 查找 review
-     * @param pid product 的 pid 字段
+     * 透过 uid 查找 review
+     * @param uid user 的 uid 字段
      * @return 非 null 的 List<Review> 引用
      * @author hoshinosena
      */
-    List<Review> findReviews(int pid);
+    List<Review> findReviews(int uid);
 
     /**
      * 获取所有 review

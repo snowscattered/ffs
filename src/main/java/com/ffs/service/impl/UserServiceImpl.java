@@ -14,7 +14,7 @@ import java.util.List;
  * UserServiceImpl 实现了 UserService
  * 详细信息在 UserService 接口中说明
  * @author hoshinosena
- * @version 1.0
+ * @version 1.1
  */
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,6 +64,10 @@ public class UserServiceImpl implements UserService {
             return -3;
         } else if (user.name == null || "".equals(user.name)) {
             return -4;
+        }
+        // 1.1添加 image 的处理
+        if (user.image == null) {
+            user.image = "";
         }
         if (user.tel == null) {
             user.tel = "";
