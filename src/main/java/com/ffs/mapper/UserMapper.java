@@ -19,7 +19,7 @@ public interface UserMapper {
     @Result(property="role", column="role", typeHandler=EnumOrdinalTypeHandler.class)
     User selectUserByUid(int uid);
 
-    @Select("select * from user where del=0 and username=#{user.username}")
+    @Select("select * from user where del=0 and username=#{username}")
     @Result(property="role", column="role", typeHandler=EnumOrdinalTypeHandler.class)
     User selectUserByUsername(String username);
 
@@ -29,7 +29,7 @@ public interface UserMapper {
             @Result(property="name", column="name")})
     List<User> selectUsersByRole(int role);
 
-    @Select("select uid,role,username,name from user where del=0 and name like concat('%',name,'%')")
+    @Select("select uid,role,username,name from user where del=0 and name like concat('%',#{name},'%')")
     @Results({@Result(property="uid", column="uid"),
             @Result(property="role", column="role", typeHandler=EnumOrdinalTypeHandler.class),
             @Result(property="username", column="username"),
