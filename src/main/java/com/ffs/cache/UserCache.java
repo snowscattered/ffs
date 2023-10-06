@@ -15,13 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class UserCache {
-    @Value("${cleanRelay}")
     private static long cleanRelay;
-    @Value("${tokenLease}")
     private static long tokenLease;
-    @Value("${maxTokenLease}")
     private static long maxTokenLease;
-    @Value("${cacheLease}")
     private static long cacheLease;
     private static Timer tokenTimer;
     private static Timer cacheTimer;
@@ -31,7 +27,15 @@ public class UserCache {
     // uid -> user
     private static volatile Map<Integer, Cache> pool;
 
-    private UserCache() {}
+    private UserCache(@Value("${cleanRelay}") long cleanRelay,
+                      @Value("${tokenLease}") long tokenLease,
+                      @Value("${maxTokenLease}") long maxTokenLease,
+                      @Value("${cacheLease}") long cacheLease) {
+        UserCache.cleanRelay = cleanRelay;
+        UserCache.tokenLease = tokenLease;
+        UserCache.maxTokenLease = maxTokenLease;
+        UserCache.cacheLease = cacheLease;
+    }
 
     /**
      * 静态工厂方法
