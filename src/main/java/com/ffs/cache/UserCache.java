@@ -23,7 +23,8 @@ public class UserCache {
     private static long maxTokenLease;
     @Value("${cacheLease}")
     private static long cacheLease;
-    private static Timer timer;
+    private static Timer tokenTimer;
+    private static Timer cacheTimer;
     private static long startTime;
     // token -> uid
     private static volatile Map<String, Integer> bind;
@@ -45,38 +46,31 @@ public class UserCache {
                     bind = new ConcurrentHashMap<>();
                     pool = new ConcurrentHashMap<>();
 
-                    // 自动清理缓存
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
+                    // 自动清理 token
+                    tokenTimer = new Timer();
+                    tokenTimer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            // 这样的话直接清除缓存了
-//                            Iterator<Cache> iterator = pool.values().iterator();
-//                            while (iterator.hasNext()) {
-//                                Cache cache = iterator.next();
-//                                if (cache.startTime + maxTokenLease < System.currentTimeMillis()) {
-//                                    iterator.remove();
-//                                } else if (cache.lastTime + tokenLease < System.currentTimeMillis()) {
-//                                    iterator.remove();
-//                                }
-//                            }
-                            // 优先清除 token 但保留缓存
                             Iterator<Integer> iterator = bind.values().iterator();
                             while (iterator.hasNext()) {
                                 Cache cache = pool.get(iterator.next());
                                 if (cache != null) {
                                     long ct = System.currentTimeMillis();
-                                    // 移除缓存即移除 token
-                                    if (cache.startTime + cacheLease < ct) {
-                                        // 没有遍历 pool 可以直接 put
-                                        pool.put(cache.user.uid, null);
-                                    } else if (cache.startTime + maxTokenLease < ct) {
+                                    if (cache.startTime + maxTokenLease < ct) {
                                         iterator.remove();
-                                    } else if (cache.lastTime + tokenLease < ct) {
+                                    } else if (cache.tokenTime + tokenLease < ct) {
                                         iterator.remove();
                                     }
                                 }
                             }
+                        }
+                    }, 0, cleanRelay);
+                    // 自动清理缓存
+                    cacheTimer = new Timer();
+                    cacheTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            pool.values().removeIf(cache -> cache.cacheTime + cacheLease < System.currentTimeMillis());
                         }
                     }, 0, cleanRelay);
                 }
@@ -114,7 +108,12 @@ public class UserCache {
         }
 
         Cache cache = pool.get(uid);
-        return cache == null ? null : cache.user;
+        if (cache == null) {
+            return null;
+        }
+
+        cache.cacheTime = System.currentTimeMillis();
+        return cache.user;
     }
 
     /**
@@ -141,6 +140,7 @@ public class UserCache {
             return null;
         }
 
+        cache.tokenTime = cache.cacheTime = System.currentTimeMillis();
         return cache.user;
     }
 
@@ -159,11 +159,14 @@ public class UserCache {
         }
 
         String token = null;
-        if (pool.containsKey(uid)) {
-            token = UUID.randomUUID().toString();
-            bind.put(token, uid);
+        Cache cache = pool.get(uid);
+        if (cache == null) {
+            return null;
         }
 
+        token = UUID.randomUUID().toString();
+        bind.put(token, uid);
+        cache.tokenTime = cache.cacheTime = System.currentTimeMillis();
         return token;
     }
 
@@ -210,11 +213,13 @@ public class UserCache {
 
 class Cache {
     public long startTime;
-    public long lastTime;
+    public long tokenTime;
+    public long cacheTime;
     public User user;
 
     public Cache(User user) {
-        this.startTime = this.lastTime = System.currentTimeMillis();
+        // tokenTime 默认0
+        this.startTime = this.cacheTime = System.currentTimeMillis();
         this.user = user;
     }
 }
