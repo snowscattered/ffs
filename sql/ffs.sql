@@ -1,7 +1,7 @@
 /**
  * 数据库基本结构
  * @author hoshinosena
- * @version 1.0
+ * @version 1.1
  */
 create database ffs;
 
@@ -15,6 +15,8 @@ role tinyint,
 username varchar(20) unique,
 password varchar(20),
 name varchar(25),
+# 1.1添加, 使用 uuid(32字符) 作为头像地址
+image char(32),
 tel varchar(20),
 address varchar(50),
 info varchar(50),
@@ -61,14 +63,21 @@ foreign key(uid) references user(uid));
 create table review(
 rid int primary key auto_increment,
 oid int,
-pid int,
+# 1.1修改 pid 为 uid
+# 只能对商家评论
+uid int,
 score tinyint,
 detail varchar(100),
 date datetime,
 # 删除标志位
 del tinyint,
+<<<<<<< HEAD
 foreign key(oid) references _order(oid),
 foreign key(pid) references product(pid));
+=======
+foreign key (oid) references _order(oid),
+foreign key(uid) references user(uid));
+>>>>>>> c00b77832a590c39ac5d30746de0a4f772624cb3
 
 # 伺服器内部中间表, 不对外开放
 create table listing(

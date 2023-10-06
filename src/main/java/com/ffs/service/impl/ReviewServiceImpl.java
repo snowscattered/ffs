@@ -13,7 +13,7 @@ import java.util.List;
  * ReviewServiceImpl 实现了 ReviewService
  * 详细信息在 ReviewService 接口中说明
  * @author hoshinosena
- * @version 1.0
+ * @version 1.1
  */
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -26,13 +26,13 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review findReview(int oid, int pid) {
-        return reviewMapper.selectReviewByOP(oid, pid);
+    public Review findReview(int oid, int uid) {
+        return reviewMapper.selectReviewByOU(oid, uid);
     }
 
     @Override
-    public List<Review> findReviews(int pid) {
-        return reviewMapper.selectReviewsByPid(pid);
+    public List<Review> findReviews(int uid) {
+        return reviewMapper.selectReviewsByUid(uid);
     }
 
     @Override
