@@ -26,19 +26,19 @@ public class OrderServiceTest {
 
     @Test
     public void test() throws Exception {
-        List<User> users = userService.findUsers();
-        for (int i=users.size()-1; 0<=i; i--) {
-            userService.delUser(users.get(i).uid);
-        }
-        List<Order> orders = orderService.findOrders();
-        for (int i=orders.size()-1; 0<=i; i--) {
-            orderService.delOrder(orders.get(i).oid);
-        }
+//        List<User> users = userService.findUsers();
+//        for (int i=users.size()-1; 0<=i; i--) {
+//            userService.delUser(users.get(i).uid);
+//        }
+//        List<Order> orders = orderService.findOrders();
+//        for (int i=orders.size()-1; 0<=i; i--) {
+//            orderService.delOrder(orders.get(i).oid);
+//        }
 
         addOrder();
-        updOrder();
-        findOrder();
-        delOrder();
+//        updOrder();
+//        findOrder();
+//        delOrder();
     }
 
     public void addOrder() throws Exception {

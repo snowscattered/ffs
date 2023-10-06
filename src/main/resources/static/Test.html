@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>快餐订制与配送系统</title>
+  <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+  <script src="js/jquery-1.9.1-min.js"></script>
+  <script src="js/jquery.cookie-1.4.1-min.js"></script>
+  <script src="js/jquery-confirm-min.js"></script>
+  <script src="js/vue-3.3.4-global-min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <!-- 桌面端兼容 -->
+  <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+</head>
+<body>
+<div id="app">
+  <!--<form action="/upload" method="post" enctype="multipart/form-data">-->
+  <input type="file" id="file" name="file">
+  <button @click="FN">提交</button>
+  <button @click="DELETE">删除</button>
+  <!--</form>-->
+  <list></list>
+</div>
+<script>
+  function getUuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0,
+              v = c == 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+  function deleteFIle(path)
+  {
+    var FSO=new ActiveXObject("Scripting.FileSystemObject");
+    alert(1111)
+    if(FSO.FileExists(path)){
+      FSO.DeleteFile(path);
+    } else
+    {
+      alert("error")
+    }
+  }
+  var { createApp }=Vue;
+  var app;
+  var container = createApp({
+    data() {
+      return {
+
+      }
+    },
+    methods:{
+      FN(){
+        if(document.getElementById("file").files.length <= 0) {
+          return false;
+        }
+        var formData=new FormData();
+        var obj;
+        formData.append("file",document.getElementById("file").files[0]);
+        $.ajax({
+          type: "POST",
+          url:"/ffs/upload",
+          data: formData,
+          timeout: 2000,
+          dataType: "json",
+          cache: false,
+          processData: false,
+          contentType: false,
+          success: function (data) {
+            obj=data;
+          },
+          complete: function (XMLHttpRequest, textStatus) {
+            if (textStatus === "success") {
+              return obj;
+            } else if (textStatus === "timeout") {
+              obj = {"code": -1, "message": "超时"};
+            } else {
+              obj = {"code": -1, "message": "客户端错误"};
+            }
+          }
+        })
+      },
+      DELETE()
+      {
+        deleteFIle("/home/snowscattered/desktop/git/ffs/src/main/resources/static/images/820af2ad33514a8486d89670b3b72006.png");
+      }
+    },
+    mounted(){
+      app=this;
+    },
+    components:{
+      "list": {
+        template:
+                "    <var-select variant=\"outlined\" size=\"small\" placeholder=\"小尺寸\" v-model=\"value12\">\n" +
+                "      <var-option label=\"吃饭\" />\n" +
+                "      <var-option label=\"睡觉\" />\n" +
+                "    </var-select>"
+      },
+    }
+  })
+  container.use(Varlet).mount("#app")
+</script>
+</body>
+</html>

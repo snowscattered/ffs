@@ -1,5 +1,7 @@
 package com.ffs.controller.Listing;
 
+import com.ffs.cache.Info;
+import com.ffs.cache.TokenPool;
 import com.ffs.po.Listing;
 import com.ffs.po.Role;
 import com.ffs.po.User;
@@ -15,10 +17,10 @@ import java.util.Map;
 
 class Para
 {
-    User own;
-    Listing listing;
-    String oid;
-    String lid;
+    public String token;
+    public Listing listing;
+    public String oid;
+    public String lid;
 
 }
 
@@ -27,11 +29,13 @@ class Para
  * @author snowscattered
  */
 @Controller
-@RequestMapping("${baseURL}"+"api/list")
+@RequestMapping("${baseURL}"+"api/listing")
 public class ListingAPI
 {
     @Autowired
     ListingService listingService;
+    @Autowired
+    TokenPool tokenPool;
 
     /**
      * 查找 listing
@@ -46,34 +50,42 @@ public class ListingAPI
     public Object getListing(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         String oid= para.oid==null?"": para.oid;
         String lid= para.lid==null?"": para.lid;
-        if (own == null)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10031);
             objs.put("message", "非法操作");
             return objs;
         }
+        User own= info.user;
 
         int checkoid=0,checklid=0;
-        try
+        if(!oid.equals(""))
         {
-            checkoid = Integer.parseInt(para.oid);
-        } catch (Exception e)
-        {
-            objs.put("code", "");
-            objs.put("message", "不正确的oid");
-            return objs;
+            try
+            {
+                checkoid = Integer.parseInt(para.oid);
+            } catch (Exception e)
+            {
+                objs.put("code", 10032);
+                objs.put("message", "不正确的oid");
+                return objs;
+            }
         }
-        try
+        if(!lid.equals(""))
         {
-            checklid = Integer.parseInt(para.lid);
-        } catch (Exception e)
-        {
-            objs.put("code", "");
-            objs.put("message", "不正确的lid");
-            return objs;
+            try
+            {
+                checklid = Integer.parseInt(para.lid);
+            } catch (Exception e)
+            {
+                objs.put("code", 10033);
+                objs.put("message", "不正确的lid");
+                return objs;
+            }
         }
 
         if (own.role == Role.admin)
@@ -81,25 +93,25 @@ public class ListingAPI
             if (oid.equals("") && lid.equals(""))
             {
                 objs.put("listings", listingService.findListings());
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else if(!oid.equals(""))
             {
-                objs.put("listings", listingService.findListing(checkoid));
-                objs.put("code", "");
+                objs.put("listings", listingService.findListingsByOid(checkoid));
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
             else
             {
                 objs.put("listing", listingService.findListing(checklid));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
         }
         else if(own.role==Role.buyer || own.role==Role.delivery)
         {
             objs.put("listings",listingService.findListingsByOid(checkoid));
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         }
         return objs;
@@ -119,9 +131,18 @@ public class ListingAPI
     public Object addListing(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         Listing listing = para.listing;
-        if (own == null || own.role != Role.admin)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
+        {
+            objs.put("code", "");
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
+
+        if (own.role != Role.admin)
         {
             objs.put("code", "");
             objs.put("message", "非法操作");
@@ -155,9 +176,18 @@ public class ListingAPI
     public Object deleteListing(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         String lid = para.lid == null ? "" : para.lid;
-        if (own == null||own.role!=Role.admin)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
+        {
+            objs.put("code", "");
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
+
+        if (own.role!=Role.admin)
         {
             objs.put("code", "");
             objs.put("message", "非法操作");

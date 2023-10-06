@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>快餐订制与配送系统</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/general.css">
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+</head>
+<body class="body">
+<div id="app" class="main">
+    <div class="div-img">
+        <div class="DivImg"></div>
+    </div>
+    <div class="div-input">
+        <div class="DivInput">
+            <div class="icon"></div>
+            <var-input class="user-input" variant="outlined" size="small" placeholder="账号" v-model="username" >
+                <template #prepend-icon>
+                    <var-icon name="account-circle" />
+                </template>
+            </var-input>
+            <var-input id="password" class="user-input" variant="outlined" size="small" placeholder="密码" type="password" v-model="password">
+                <template #prepend-icon>
+                    <var-icon name="lock" />
+                </template>
+            </var-input>
+            <var-button class="button-login" @click="login">登陆</var-button>
+            <var-button class="button-login" @click="to_registered">注册</var-button>
+            <var-button class="button-about" @click="to_about">关于</var-button>
+        </div>
+    </div>
+</div>
+<script>
+    var { createApp }=Vue;
+    var app;
+    var container = createApp({
+        data() {
+            return {
+                "username":"",
+                "password":"",
+            }
+        },
+        methods: {
+            login(){
+                if (app.username === "" || app.password === "") {
+                    $.alert({
+                        title: "提示",
+                        content: "请输入正确的用户名和密码",
+                        buttons: {
+                            ok: {
+                                text: "好"
+                            }
+                        },
+                        boxWidth: "30%",
+                        useBootstrap: false,
+                        theme: "material",
+                        animationBounce: 1.5,
+                    })
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: $.cookie("baseURL") + "to_login",
+                    data: JSON.stringify({
+                        "username": app.username,
+                        "password": app.password
+                    }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code === 0) {
+                            window.location.href = $.cookie("baseURL") + data.url;
+                        } else {
+                            $.alert({
+                                title: "提示",
+                                content: "<h3>登陆失败</h3><h5>错误代码: "
+                                    + data.code + "</h5><h5>错误提示: "
+                                    + data.message + "</h5>",
+                                buttons: {
+                                    ok: {
+                                        text: "好"
+                                    }
+                                },
+                                boxWidth: "30%",
+                                useBootstrap: false,
+                                theme: "material",
+                                animationBounce: 1.5,
+                            })
+                        }
+                    }
+                })
+            },
+            to_registered(){
+                $.confirm({
+                    title: "注册用户",
+                    content:
+                        "<div><div>" +
+                        "<h3 id='1' style='display: inline'>账号: </h3><input id='addUsername' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>密码: </h3><input id='addPassword' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>姓名: </h3><input id='addName' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>身份: </h3>" +
+                        "<select id='addRole'>" +
+                        "<option value='buyer'>用户</option>" +
+                        "<option value='shop'>商家</option>" +
+                        "<option value='delivery'>骑手</option> " +
+                        "</select>" +
+                        "</div></div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                $.ajax({
+                                    type: "POST",
+                                    url: $.cookie("baseURL") + "to_sign",
+                                    data: JSON.stringify({
+                                        "username": this.$content.find("#addUsername").val(),
+                                        "password": this.$content.find("#addPassword").val(),
+                                        "name": this.$content.find("#addName").val(),
+                                        "role": this.$content.find("#addRole").val(),
+                                    }),
+                                    contentType: "application/json",
+                                    dataType: "json",
+                                    success: function (data) {
+                                        if (data.code === 0) {
+                                            $.alert({
+                                                title: "提示",
+                                                content: "<h3>注册成功</h3>",
+                                                buttons: {
+                                                    ok: {
+                                                        text: "好"
+                                                    }
+                                                },
+                                                boxWidth: "30%",
+                                                useBootstrap: false,
+                                                theme: "material",
+                                                animationBounce: 1.5,
+                                            })
+                                        } else {
+                                            $.alert({
+                                                title: "提示",
+                                                content: "<h3>注册失败</h3><h5>错误代码: "
+                                                    + data.code + "</h5><h5>错误提示: "
+                                                    + data.message + "</h5>",
+                                                buttons: {
+                                                    ok: {
+                                                        text: "好"
+                                                    }
+                                                },
+                                                boxWidth: "30%",
+                                                useBootstrap: false,
+                                                theme: "material",
+                                                animationBounce: 1.5,
+                                            })
+                                        }
+                                    }
+                                })
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+            to_about(){
+
+            }
+        },
+        mounted() {
+            app = this;
+        },
+    })
+    container.use(Varlet).mount("#app")
+</script>
+</body>
+</html>

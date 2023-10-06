@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>shop</title>
+    <link rel="stylesheet" type="text/css" href="css/shop.css">
+    <link rel="stylesheet" type="text/css" href="css/general.css">
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+</head>
+<body class="broaden">
+<div id="app" class="container">
+    <div class="Top-Bar blue">
+        <var-tabs class="Bar-Right" style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3)" v-model:active="show">
+            <var-tab name="2" style="--tab-font-size:20px;--tab-padding:20px"><var-icon name="menu" /></var-tab>
+            <var-tab name="1" style="--tab-font-size:20px;--tab-padding:20px"><var-icon name="format-list-checkbox" /></var-tab>
+            <var-tab name="0" style="--tab-font-size:20px;--tab-padding:20px"><var-icon name="home" /></var-tab>
+        </var-tabs>
+    </div>
+    <div v-if="show == 0" class="mine green">
+        <div class="shop-info blue"></div>
+    </div>
+    <div v-if="show == 1" class="shop black">
+        <div class="shop-body">
+        </div>
+    </div>
+    <div v-if="show == 2" class="order orange">
+        <div class="order-list blue"></div>
+        <div class="order-list blue"></div>
+    </div>
+</div>
+<script>
+    var { createApp }=Vue;
+    var app
+    var container = createApp({
+        data() {
+            return {
+                "show":0,
+            }
+        },
+        methods: {
+        },
+        mounted(){
+            app=this;
+        },
+        components: {
+        },
+    })
+    container.use(Varlet).mount("#app")
+</script>
+</body>
+</html>

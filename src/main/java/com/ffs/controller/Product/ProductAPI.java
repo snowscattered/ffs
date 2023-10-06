@@ -1,5 +1,7 @@
 package com.ffs.controller.Product;
 
+import com.ffs.cache.Info;
+import com.ffs.cache.TokenPool;
 import com.ffs.po.Product;
 import com.ffs.po.Role;
 import com.ffs.po.User;
@@ -19,7 +21,7 @@ class Para
     public String uid;
     public String name;
     public String pid;
-    public User own;
+    public String token;
     public Product product;
 }
 /**
@@ -32,6 +34,9 @@ public class ProductAPI
 {
     @Autowired
     ProductService productService;
+
+    @Autowired
+    TokenPool tokenPool;
 
     /**
      * 查找 Product
@@ -48,18 +53,18 @@ public class ProductAPI
     public Object getProduct(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         String uid = para.uid == null ? "" : para.uid;
         String name = para.name == null ? "" : para.name;
-        String pid = para.pid == null ? "" : para.name;
-
-        if (own == null)
+        String pid = para.pid == null ? "" : para.pid;
+        String token=para.token==null? "" :para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10011);
             objs.put("message", "非法操作");
             return objs;
         }
-
+        User own= info.user;
         //初始化可能会有问题
         int checkuid = 0, checkpid = 0;
         if (!uid.equals(""))
@@ -69,7 +74,7 @@ public class ProductAPI
                 checkuid = Integer.parseInt(uid);
             } catch (Exception e)
             {
-                objs.put("code", "");
+                objs.put("code", 10012);
                 objs.put("message", "不正确的uid");
                 return objs;
             }
@@ -81,34 +86,32 @@ public class ProductAPI
                 checkpid = Integer.parseInt(pid);
             } catch (Exception e)
             {
-                objs.put("code", "");
+                objs.put("code", 10013);
                 objs.put("message", "不正确的pid");
                 return objs;
             }
         }
-
         if (own.role == Role.admin)
         {
             if (uid.equals("") && pid.equals("") && name.equals(""))
             {
                 objs.put("products", productService.findProducts());
-                objs.put("code", "");
-                objs.put("message", "");
+                objs.put("code", 0);
+                objs.put("message", "success");
             } else if (!uid.equals(""))
             {
-
                 objs.put("products", productService.findProducts(checkuid));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else if (!name.equals(""))
             {
                 objs.put("products", productService.findProducts(name));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else if(!pid.equals(""))
             {
-                objs.put("product", productService.findProducts(checkpid));
-                objs.put("code", "");
+                objs.put("product", productService.findProduct(checkpid));
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
         } else if (own.role == Role.shop)
@@ -116,31 +119,31 @@ public class ProductAPI
             if (pid.equals(""))
             {
                 objs.put("products", productService.findProducts(own.uid));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else
             {
                 objs.put("product", productService.findProducts(checkpid));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
         } else if (own.role == Role.delivery)
         {
-            objs.put("product", productService.findProducts(pid));
-            objs.put("code", "");
+            objs.put("product", productService.findProduct(checkpid));
+            objs.put("code", 0);
             objs.put("message", "success");
         } else if(own.role==Role.buyer)
         {
             if(uid.equals(""))
             {
-                objs.put("code","");
+                objs.put("code", 10013);
                 objs.put("message","未选择商家");
                 return objs;
             }
             if(pid.equals("")&&name.equals(""))
             {
                 objs.put("products",productService.findProducts(checkuid));
-                objs.put("code","");
+                objs.put("code",0);
                 objs.put("message","success");
             }
             else if(!name.equals(""))
@@ -150,14 +153,14 @@ public class ProductAPI
                     if(product.uid!=checkuid)
                         products.remove(product);
                 objs.put("products",products);
-                objs.put("code","");
+                objs.put("code",0);
                 objs.put("message","success");
             }
             else if(!pid.equals(""))
             {
                 Product product= productService.findProduct(checkpid);
                 objs.put("product",product.uid==checkuid?"":product);
-                objs.put("code","");
+                objs.put("code",0);
                 objs.put("message","success");
             }
         }
@@ -176,18 +179,26 @@ public class ProductAPI
     public Object addProduct(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         Product product = para.product;
-
-        if (own == null || own.role == Role.delivery || own.role == Role.buyer)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10011);
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
+
+        if (own.role == Role.delivery || own.role == Role.buyer)
+        {
+            objs.put("code", 10011);
             objs.put("message", "非法操作");
             return objs;
         }
         if (product == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10012);
             objs.put("message", "product错误");
             return objs;
         }
@@ -196,12 +207,12 @@ public class ProductAPI
         int status = productService.addProduct(product);
         if (status == 1)
         {
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         } else
         {
-            objs.put("code", "");
-            objs.put("messge", "product异常");
+            objs.put("code", 10012);
+            objs.put("message", "product异常");
         }
         return objs;
     }
@@ -213,23 +224,31 @@ public class ProductAPI
      * @return 返回相应的 json
      * @author snowscattered
      */
-    @RequestMapping("/updata")
+    @RequestMapping("/update")
     @ResponseBody
     public Object updataProduct(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         Product product = para.product;
-
-        if (own == null || own.role == Role.delivery || own.role == Role.buyer)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10011);
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
+
+        if (own.role == Role.delivery || own.role == Role.buyer)
+        {
+            objs.put("code", 10011);
             objs.put("message", "非法操作");
             return objs;
         }
         if (product == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10015);
             objs.put("message", "没有待修改商品");
             return objs;
         }
@@ -238,12 +257,12 @@ public class ProductAPI
         int status = productService.updProduct(product);
         if (status == 1)
         {
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         } else
         {
-            objs.put("code", "");
-            objs.put("messge", "product异常");
+            objs.put("code", 10012);
+            objs.put("message", "product异常");
         }
         return objs;
     }
@@ -260,11 +279,20 @@ public class ProductAPI
     public Object deleteProduct(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = para.own;
         String pid = para.pid == null ? "" : para.pid;
-        if (own == null || own.role == Role.delivery || own.role == Role.buyer)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10011);
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
+
+        if (own.role == Role.delivery || own.role == Role.buyer)
+        {
+            objs.put("code", 10011);
             objs.put("message", "非法操作");
             return objs;
         }
@@ -275,17 +303,17 @@ public class ProductAPI
             checkpid = Integer.parseInt(pid);
         } catch (Exception e)
         {
-            objs.put("code", "");
+            objs.put("code", 10013);
             objs.put("message", "不正确的pid");
             return objs;
         }
         if (productService.delProduct(checkpid) == 0)
         {
-            objs.put("code", "");
+            objs.put("code", 10012);
             objs.put("message", "product异常");
         } else
         {
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         }
         return objs;

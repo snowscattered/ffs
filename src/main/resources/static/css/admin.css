@@ -1,0 +1,55 @@
+.tabs-example-vertical {
+    top: 0;
+    left: 0;
+    position: fixed;
+    width: 15% !important;
+    height: 100% !important;
+}
+
+.nav{
+    top: 0;
+    left: 0;
+    position: fixed;
+    width: 14%;
+    height: 100%;
+    background-color: rgba(0,0,0,0);
+}
+.left{
+    display: inline;
+    width: 20%;
+    height: 100%;
+    float: left;
+}
+.main{
+    top: 0;
+    left: 14%;
+    position: fixed;
+    display: block;
+    background-color: transparent;
+    width: 86%;
+    height: 100%;
+    overflow: auto;
+}
+.middle{
+    margin: 2rem 0 4rem 0;
+    padding: 0 1rem 1rem;
+    position: relative;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .3), 0 2.5rem 5rem 0 rgba(0, 0, 0, .4);
+    display: inline;
+    background-color: rgba(255,255,255,.65);
+    width: 55%;
+    float: left;
+}
+.add
+{
+    float: left;
+}
+.delete
+{
+    float: right;
+}
+.select
+{
+    margin: 0 0 0 10px;
+    float: left;
+}

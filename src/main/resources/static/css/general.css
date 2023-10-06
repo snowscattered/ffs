@@ -1,0 +1,113 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.broaden
+{
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    position: absolute;
+    z-index: 1;
+}
+.action{
+    margin : 0;
+    padding: 0.8em 2em;
+    border: 1px;
+    background: transparent;
+    width: 100%;
+}
+.container
+{
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: white;
+    background-size: 100% 100%;
+}
+.Top-Bar
+{
+    width: 100%;
+    height: 10%;
+    background: linear-gradient(to right, aqua, white);
+}
+.Bar-Right
+{
+    padding: 10%;
+    width: auto;
+    float: right;
+}
+.Bar-Left
+{
+    padding: 10%;
+    width: auto;
+    float: left;
+}
+.mine
+{
+    width: 100%;
+    height: 90%;
+}
+.input{
+    margin: 0;
+    padding: 0.5em 1em;
+    line-height: 175%;
+    border: 1px solid rgb(0,0,0,0.1);
+    background: #00000099;
+    color: #ffffff;
+    opacity: 70%;
+}
+.input--block{
+    margin-bottom: 0.5em;
+    display: block;
+    width: 90%;
+}
+.button{
+    margin: 0;
+    padding: 0.5em 1em;
+    line-height: 175%;
+    border: 1px solid rgb(0,0,0,0.1);
+    background: #2196f3ba;
+    color: #000;
+    opacity: 60%;
+}
+.button--line{
+    margin-bottom: 0.5em;
+    width: 49%;
+}
+
+.div-scroll
+{
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.div-scroll::-webkit-scrollbar{
+    display: none;
+}
+.head
+{
+    height: auto;
+    margin: 6% 0 0 0;
+}
+.product-img
+{
+    height: 450px;
+    width: 300px;
+}
+
+.blue
+{
+    background-color: #5BC0DE;
+}
+.green
+{
+    background-color: #5CB85C;
+}
+.orange
+{
+    background-color: #F0AD4E;
+}
+.black
+{
+    background-color: black;
+}

@@ -1,0 +1,95 @@
+.mine
+{
+    width: 100%;
+    height: 90%;
+}
+.shop-info
+{
+    margin: 5% 15%;
+    width: 70%;
+    height: 70%;
+    position: absolute;
+}
+.shop
+{
+    width: 100%;
+    height: 90%;
+}
+.shop-body
+{
+    margin: 5% 15%;
+    width: 70%;
+    height: 70%;
+    position: absolute;
+}
+.order
+{
+    width: 100%;
+    height: 90%;
+}
+.order-list
+{
+    width: 30%;
+    height: 75%;
+    margin: 5% 10%;
+    float: left;
+}
+
+.shop-product{
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #c6c6c6 !important;
+    margin-bottom: 20px;
+}
+
+.shop-product th{
+    border-collapse: collapse;
+    border-right: 1px solid #c6c6c6 !important;
+    border-bottom: 1px solid #c6c6c6 !important;
+    background-color: transparent !important;
+    padding: 5px 9px;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: center;
+}
+.shop-product thead{
+    background: #2196f3ba;
+    color: #000;
+    opacity: 60%;
+}
+
+.shop-product td{
+    border-collapse: collapse;
+    border-right: 1px solid #c6c6c6 !important;
+    border-bottom: 1px solid #c6c6c6 !important;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: normal;
+    text-align: center;
+    word-break: break-all;
+}
+.shop-product tr:nth-child(odd){
+    background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.shop-product tr:nth-child(even){
+    background-color: rgba(248, 248, 248, 0.8) !important;
+}
+
+
+.blue
+{
+    background-color: #5BC0DE;
+}
+.green
+{
+    background-color: #5CB85C;
+}
+.orange
+{
+    background-color: #F0AD4E;
+}
+.black
+{
+    background-color: black;
+}

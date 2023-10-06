@@ -1,5 +1,7 @@
 package com.ffs.controller.Review;
 
+import com.ffs.cache.Info;
+import com.ffs.cache.TokenPool;
 import com.ffs.po.Review;
 import com.ffs.po.Role;
 import com.ffs.po.User;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 class Para
 {
-    public User own;
+    public String token;
     public String pid;
     public String oid;
     public String rid;
@@ -28,6 +30,8 @@ public class ReviewAPI
 {
     @Autowired
     ReviewService reviewService;
+    @Autowired
+    TokenPool tokenPool;
 
     /**
      * 查找 review
@@ -43,16 +47,17 @@ public class ReviewAPI
     public Object getReview(@RequestBody Para para)
     {
         Map<String,Object> objs=new LinkedHashMap<>();
-        User own= para.own;
         String pid= para.pid==null?"": para.pid;
         String oid= para.oid==null?"": para.oid;
-
-        if(own==null)
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
             objs.put("code", "");
             objs.put("message", "非法操作");
             return objs;
         }
+        User own= info.user;
 
         int checkpid = 0,checkoid=0;
         if(!pid.equals(""))
@@ -131,10 +136,18 @@ public class ReviewAPI
     public Object addReview(@RequestBody Para para)
     {
         Map<String,Object> objs=new LinkedHashMap<>();
-        User own= para.own;
         Review review= para.review;
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
+        {
+            objs.put("code", "");
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
 
-        if(own==null||own.role!=Role.buyer)
+        if(own.role!=Role.buyer)
         {
             objs.put("code", "");
             objs.put("message", "非法操作");
@@ -173,10 +186,18 @@ public class ReviewAPI
     public Object deleteReview(@RequestBody Para para)
     {
         Map<String,Object> objs=new LinkedHashMap<>();
-        User own= para.own;
         String rid= para.rid==null?"": para.rid;
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
+        {
+            objs.put("code", "");
+            objs.put("message", "非法操作");
+            return objs;
+        }
+        User own= info.user;
 
-        if(own==null||own.role==Role.shop||own.role==Role.delivery)
+        if(own.role==Role.shop||own.role==Role.delivery)
         {
             objs.put("code", "");
             objs.put("message", "非法操作");

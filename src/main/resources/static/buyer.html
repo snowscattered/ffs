@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>buyer</title>
+    <link rel="stylesheet" type="text/css" href="css/buyer.css">
+    <link rel="stylesheet" type="text/css" href="css/general.css">
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+</head>
+<body class="broaden">
+<div id="app" class="container">
+    <div class="Top-Bar blue">
+        <var-tabs class="Bar-Left" style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0)">
+            <var-tab style="--tab-font-size:20px;--tab-padding:20px"><var-icon name="upload" @click="logout"/></var-tab>
+        </var-tabs>
+        <var-tabs class="Bar-Right" style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3)" v-model:active="show">
+            <var-tab name="2" style="--tab-font-size:20px;--tab-padding:20px" @click="findOrders" ><var-icon name="menu" /></var-tab>
+            <var-tab name="1" style="--tab-font-size:20px;--tab-padding:20px" @click="findshops" ><var-icon name="cart" /></var-tab>
+            <var-tab name="0" style="--tab-font-size:20px;--tab-padding:20px"><var-icon name="home" /></var-tab>
+        </var-tabs>
+    </div>
+    <div v-if="show == 0" class="mine green">
+        <div class="buyer-info blue">
+            <div style="text-align: center"><h1>查看与修改信息</h1></div></br></br>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>UID: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" :value="uid" readonly="readonly"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>姓名: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" placeholder="name" v-model="name"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>账户: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" :value="username" readonly="readonly"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>密码: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" placeholder="password" v-model="password"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>电话: </h3>
+                    </div>
+                    <div style="width: 80%;"><input class="input input--block" placeholder="tel" v-model="tel"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>地址: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" placeholder="address" v-model="address"></div>
+                </div>
+            </div>
+            <div style="display: flex">
+                <div style="width: 25%"></div>
+                <div style="width: 30em;display: flex">
+                    <div style="width: 10%">
+                        <div style="height: 20%"></div>
+                        <h3>备注: </h3>
+                    </div>
+                    <div style="width: 80%"><input class="input input--block" placeholder="info" v-model="info"></div>
+                </div>
+            </div>
+            <div style="justify-content: center;align-items: center;display: flex">
+                <div style="width: 20%"></div>
+                <div style="width: 40%"><button class="button button--line" @click="updateUser">修改</button></div>
+            </div>
+        </div>
+    </div>
+    <div v-if="show == 1" class="shop black">
+        <div class="list">
+            <var-input placeholder="请输入商家名" variant="outlined" size="small" v-model="shopname" style="width: auto;margin: 8px 5px;--field-decorator-text-color:rgb(255,255,255)"></var-input>
+            <shop-table class="div-scroll" :shop="shop"></shop-table>
+        </div>
+        <div class="shop-product blue">
+        </div>
+    </div>
+    <div v-if="show == 2" class="order">
+        <div class="order-info blue">
+            <order-table class="div-scroll" style="height: 500px;margin: 0" :orders="orders"></order-table>
+        </div>
+    </div>
+</div>
+<script>
+    var baseURL = API.baseURL = $.cookie("baseURL");
+    var { createApp }=Vue;
+    var app
+    var container = createApp({
+        data() {
+            return {
+                "token": $.cookie("token"),
+                "uid": $.cookie("uid"),
+                "name": $.cookie("name"),
+                "username": $.cookie("username"),
+                "password": "",
+                "tel": $.cookie("tel"),
+                "address": $.cookie("address"),
+                "info": $.cookie("info"),
+                "show": 0,
+                "shop": [],
+                "products": [],
+                "orders": [],
+                "shopname": "",
+            }
+        },
+        watch:{
+            shopname(newShopname,oldShopname) {
+                this.shop=API.getUser(null,newShopname,"shop",null).users;
+            }
+        },
+        methods: {
+            updateUser() {
+                var user = {};
+                var result;
+                user.uid = $.cookie("uid");
+                user.name = this.name;
+                user.password = this.password;
+                user.tel = this.tel;
+                user.address = this.address;
+                user.info = this.info;
+                result = API.updateUser(user);
+                if (result.code === 0) {
+                    if (user.name != null) {
+                        $.cookie("name", user.name);
+                    }
+                    $.cookie("tel", user.tel);
+                    $.cookie("address", user.address);
+                    $.cookie("info", user.info);
+                    $(function () {
+                        $.alert({
+                            title: "提示",
+                            content: "资料更新成功",
+                            buttons: {
+                                ok: {
+                                    text: "好"
+                                }
+                            },
+                            boxWidth: "30%",
+                            useBootstrap: false,
+                            theme: "material",
+                            animationBounce: 1.5,
+                        })
+                    })
+                } else {
+                    $.alert({
+                        title: "提示",
+                        content: "<h3>资料更新失败</h3><h5>错误代码: "
+                            + result.code + "</h5><h5>错误提示: "
+                            + result.message + "</h5>",
+                        buttons: {
+                            ok: {
+                                text: "好"
+                            }
+                        },
+                        boxWidth: "30%",
+                        useBootstrap: false,
+                        theme: "material",
+                        animationBounce: 1.5,
+                    })
+                }
+            },
+            findshops() {
+                this.shopname="";
+                this.shop = API.getUser(null, null, null, null).users;
+            },
+            findProducts(uid) {
+                this.products=API.getProduct(null,uid,null,null).products;
+            },
+            findOrders() {
+                this.orders=API.getOrder(null,null).orders;
+            },
+            getOrderDetail(oid) {
+                var result = API.getOrder(oid,null);
+                if (result.code === 0) {
+                    var order = result.order;
+                    var listings = API.getListing(oid,null).listings;
+                    var len=listings.length;
+                    var head=
+                        "<div>" +
+                        "<div><h3>买家: " + order.bid + "</h3></div>" +
+                        "<div><h3>卖家: " + order.sid + "</h3></div>" +
+                        "<div><h3>骑手: " + order.did + "</h3></div>" +
+                        "</div>"+
+                        "<table>" +
+                        "    <thead>" +
+                        "        <tr>" +
+                        "            <td><h3>订单列表编号</h3></td>" +
+                        "            <td><h3>商品编号</h3></td>" +
+                        "            <td><h3>买家编号</h3></td>" +
+                        "            <td><h3>数量</h3></td>" +
+                        "        </tr>" +
+                        "    </thead>";
+                    var i=0;
+                    var text=""
+                    for(;i<len;i++)
+                    {
+                        text+=
+                            "        <tr>" +
+                            "            <td><h3>" + listings[i].lid + "</h3></td>" +
+                            "            <td><h3>" + listings[i].pid + "</h3></td>" +
+                            "            <td><h3>" + listings[i].uid + "</h3></td>" +
+                            "            <td><h3>" + listings[i].amount + "</h3></td>" +
+                            "        </tr>";
+                    }
+                    var body=
+                        "    <tbody>" +
+                        text +
+                        "    </tbody>" +
+                        "</table>"
+                    $.dialog({
+                        title: "订单详细信息",
+                        content:head+body,
+                        boxWidth: "45%",
+                        useBootstrap: false,
+                        theme: "material",
+                        animationBounce: 1.5
+                    })
+                } else {
+                    $.dialog({
+                        title: "通讯异常",
+                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
+                        boxWidth: "45%",
+                        useBootstrap: false,
+                        theme: "material",
+                        animationBounce: 1.5
+                    })
+                }
+            },
+            logout() {
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "to_logout",
+                    async: false
+                });
+                var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+                if (keys) {
+                    for (var i = keys.length; i--;)
+                        document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString() + ";path=/;";
+                }
+                sessionStorage.clear();
+                window.location.href = baseURL;
+            },
+        },
+        mounted() {
+            app=this;
+        },
+        components: {
+            "shop-table": {
+                props: ["shop"],
+                template:
+                    "  <var-table style='--table-background:rgb(0,0,0,0)'>\n" +
+                    "    <tbody v-for='item in shop' :key='item.uid'>\n" +
+                    "      <tr>\n" +
+                    "        <th @click='findProducts(item.uid)'>{{ item.name }}</th>\n" +
+                    "      </tr>\n" +
+                    "    </tbody>\n" +
+                    "  </var-table>",
+            },
+            data() {
+            },
+            method: {
+                findProducts(uid) {
+                    app.findProducts(uid);
+                }
+            },
+            "order-table": {
+                props: ["orders"],
+                template:
+                    "  <var-table style='height: 100%'>\n" +
+                    "    <thead>\n" +
+                    "      <tr>\n" +
+                    "        <th>编号</th>\n" +
+                    "        <th>付款凭证</th>\n" +
+                    "        <th>交易状态</th>" +
+                    "        <th>时间</th>\n" +
+                    "        <th>备注</th>\n" +
+                    "        <th>详细信息</th>\n" +
+                    "        <th>支付情况</th>\n" +
+                    "      </tr>\n" +
+                    "    </thead>\n" +
+                    "    <tbody v-for='item in orders' :key='item.oid'>\n" +
+                    "      <tr>\n" +
+                    "        <th>{{ item.oid }}</th>\n" +
+                    "        <th>{{ item.tid }}</th>\n" +
+                    "        <th>{{ item.state }}</th>\n" +
+                    "        <th>{{ item.date }}</th>\n" +
+                    "        <th>{{ item.info }}</th>\n" +
+                    "        <th><a href='javascript:void(0)' @click='getOrderDetail(item.oid)'>" +
+                    "                <var-icon name='view' color='#000'/>" +
+                    "            </a></th>\n" +
+                    "        <th><a v-if='item.state==\"unpaid\"' href='javascript:void(0)' @click='updateOrder(item.oid)'>" +
+                    "                <var-icon name='cog' color='#000'/>" +
+                    "            </a></th>\n" +
+                    "      </tr>\n" +
+                    "    </tbody>\n" +
+                    "  </var-table>",
+                data() {
+                    return {
+
+                    }
+                },
+                methods: {
+                    getOrderDetail(oid) {
+                        app.getOrderDetail(oid)
+                    },
+                    updateOrder(oid) {
+                        $.alert({
+                            title: "支付",
+                            content:
+                                "</div>" +
+                                "<div><h3>请支付</h3></div>" +
+                                "</div>",
+                            buttons:{
+                                confirm: {
+                                    text: "支付完毕",
+                                    action: function() {
+                                        var result;
+                                        var order=API.getOrder(oid,null).order;
+                                        order.state="paid";
+                                        result=API.updateOrder(order);
+                                        if (result.code === 0) {
+                                            $.alert({
+                                                title: "支付成功",
+                                                content: "数据已提交并被接受",
+                                                buttons: {
+                                                    ok: {
+                                                        text: "好"
+                                                    }
+                                                },
+                                                boxWidth: "30%",
+                                                useBootstrap: false,
+                                                theme: "material",
+                                                animationBounce: 1.5
+                                            });
+                                            app.orders=API.getOrder(null,null).orders;
+                                        } else {
+                                            $.alert({
+                                                title: "支付失败",
+                                                content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
+                                                buttons: {
+                                                    ok: {
+                                                        text: "好",
+                                                    }
+                                                },
+                                                boxWidth: "30%",
+                                                useBootstrap: false,
+                                                theme: "material",
+                                                animationBounce: 1.5
+                                            });
+                                        }
+                                    }
+                                },
+                                cancel: {
+                                    text: "取消"
+                                }
+                            },
+                            boxWidth: "25%",
+                            useBootstrap: false,
+                            theme: "material",
+                            animationBounce: 1.5,
+                        })
+                    },
+                }
+            },
+        },
+    })
+    container.use(Varlet).mount("#app")
+</script>
+</body>
+</html>

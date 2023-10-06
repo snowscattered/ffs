@@ -20,15 +20,17 @@ public class UserServiceTest {
 
     @Test
     public void test() throws Exception {
-        List<User> users = userService.findUsers();
-        for (int i=users.size()-1; 0<=i; i--) {
-            userService.delUser(users.get(i).uid);
-        }
-
-        addUser();
-        findUser();
-        updUser();
-        delUser();
+//        List<User> users = userService.findUsers();
+//        for (int i=users.size()-1; 0<=i; i--) {
+//            userService.delUser(users.get(i).uid);
+//        }
+//
+//        addUser();
+//        findUser();
+//        updUser();
+//        delUser();
+       List<User> users=userService.findUsers("QWQ");
+       System.out.println(users.get(0).uid);
     }
 
     public void addUser() throws Exception {

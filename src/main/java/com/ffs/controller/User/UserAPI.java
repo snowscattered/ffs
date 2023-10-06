@@ -1,5 +1,7 @@
 package com.ffs.controller.User;
 
+import com.ffs.cache.Info;
+import com.ffs.cache.TokenPool;
 import com.ffs.po.Role;
 import com.ffs.po.User;
 import com.ffs.service.UserService;
@@ -13,13 +15,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class Pare
+class Para
 {
     public String uid;
     public String name;
-    public User onw;
+    public String token;
     public User other;
-    public String GR;
+    public String role;
 }
 /**
  * 针对用户时的操作处理
@@ -32,44 +34,52 @@ public class UserAPI
     @Autowired
     UserService userService;
 
+    @Autowired
+    TokenPool tokenPool;
 
     /**
      * 获取 user
      * 当 Role 为 buyer 时,分别用于获取自己和所有商家或者指定商家的 user,并分页
      * 当 Role 为 shop 和 delivery 时,用于获取自身的个人信息
      * 当 Role 为 admin 时,用于获取所有的用户或者指定 user,并分页
-     * @param pare 为页面传进的 json 对应值
+     * @param para 为页面传进的 json 对应值
      * @return 返回对应信息和信息体
      * @author snowscattered
      */
     @RequestMapping("/get")
     @ResponseBody
-    public Object getUser(@RequestBody Pare pare)
+    public Object getUser(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        String uid = pare.uid == null ? "" : pare.uid;
-        String name = pare.name == null ? "" : pare.name;
-        String GR = pare.GR == null ? "" : pare.GR;
-        User own = pare.onw;
-
-        if (own == null)
+        String uid = para.uid == null ? "" : para.uid;
+        String name = para.name == null ? "" : para.name;
+        String role = para.role == null ? "" : para.role;
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null)
         {
-            objs.put("code", "");
-            objs.put("message", "非法操作");
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-
+        User own= info.user;
         if (own.role == Role.admin)
         {
-            if (name.equals("") && uid.equals(""))
+            List<User> users;
+            if(name.equals("")){
+                users=userService.findUsers();
+            } else {
+                users = userService.findUsers(name);
+            }
+
+            if(!role.equals(""))
             {
-                objs.put("users", userService.findUsers());
-                objs.put("code", "");
-                objs.put("message", "success");
-            } else if (!name.equals(""))
+                users.removeIf(user -> user.role!=Role.valueOf(role));
+            }
+            if (uid.equals(""))
             {
-                objs.put("users", userService.findUsers(name));
-                objs.put("code", "");
+                objs.put("users", users);
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else
             {
@@ -79,34 +89,41 @@ public class UserAPI
                     checkUid = Integer.parseInt(uid);
                 } catch (Exception e)
                 {
-                    objs.put("code", "");
+                    objs.put("code", 10003);
                     objs.put("message", "不正确的uid");
                     return objs;
                 }
                 objs.put("user", userService.findUser(checkUid));
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
         }
         if (own.role == Role.shop || own.role == Role.delivery)
         {
             objs.put("user", own);
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         }
         if (own.role == Role.buyer)
         {
-            if (GR.equals("mine"))
+            if (role.equals("buyer"))
             {
                 objs.put("user", own);
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
-            } else
+            } else if(!name.equals(""))
             {
                 List<User> users = userService.findUsers(name);
                 users.removeIf(user -> user.role != Role.shop);
                 objs.put("users", users);
-                objs.put("code", "");
+                objs.put("code", 0);
+                objs.put("message", "success");
+            } else
+            {
+                List<User> users = userService.findUsers();
+                users.removeIf(user -> user.role != Role.shop);
+                objs.put("users", users);
+                objs.put("code", 0);
                 objs.put("message", "success");
             }
         }
@@ -117,31 +134,32 @@ public class UserAPI
      * 添加 user
      * 当 role 为 admin 时，可以创建一切合法账户
      * 当 role 不为 admin 时，可以创建除 admin 以外的账户(保留意见)
-     * @param pare
+     * @param para
      * @return 返回显示json
      * @author snowscattered
      */
     @RequestMapping("/add")
     @ResponseBody
-    public Object addUser(@RequestBody Pare pare)
+    public Object addUser(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = pare.onw;
-        User other = pare.other;
-
-        if (own == null || other == null)
+        User other = para.other;
+        String token=para.token==null?"":para.token;
+        Info info=tokenPool.pool.get(token);
+        if (info == null || other == null)
         {
-            objs.put("code", "");
-            objs.put("message", "非法操作");
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
+        User own= info.user;
 
         if (own.role != Role.admin)
         {
             if (other.role == Role.admin)
             {
-                objs.put("code", "");
-                objs.put("message", "非法操作");
+                objs.put("code", 10001);
+                objs.put("message", "非法操作2");
                 return objs;
             }
         }
@@ -149,11 +167,11 @@ public class UserAPI
         int status = userService.addUser(other);
         if (status == 1)
         {
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         } else
         {
-            objs.put("code", "");
+            objs.put("code", 10002);
             objs.put("message", "user异常");
         }
         return objs;
@@ -161,50 +179,45 @@ public class UserAPI
 
     /**
      * 添加 user
-     * 当 role 为 admin 时，可以修改一切合法账户(自身除外)
+     * 当 role 为 admin 时，可以修改一切合法账户
      * 当 role 不为 admin 时，只能修改个人账户(保留意见)
-     * @param pare
+     * @param para
      * @return 返回显示 json
      * @author snowscattered
      */
-    @RequestMapping("/updata")
+    @RequestMapping("/update")
     @ResponseBody
-    public Object updataUser(@RequestBody Pare pare)
+    public Object updateUser(@RequestBody Para para)
     {
-
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = pare.onw;
-        User other = pare.other;
+        User other = para.other;
+        String token=para.token==null?"":para.token;
+        Info info=tokenPool.pool.get(token);
 
-        if (own == null || other == null)
+        if (info == null || other == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10001);
             objs.put("message", "非法操作");
             return objs;
         }
-
+        User own= info.user;
         //待修改
         if (own.role == Role.admin)
         {
-            if(own.uid==other.uid)
+            if (userService.updUser(other) == 1)
             {
-                objs.put("code","");
-                objs.put("message","操作异常");
-                return objs;
-            } else if (userService.updUser(other) == 1)
-            {
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else
             {
-                objs.put("code", "");
+                objs.put("code", 10002);
                 objs.put("message", "user异常");
             }
         } else
         {
             if(own.uid!=other.uid)
             {
-                objs.put("code", "");
+                objs.put("code", 10005);
                 objs.put("message", "操作异常");
                 return objs;
             }
@@ -212,11 +225,11 @@ public class UserAPI
             int status = userService.updUser(other);
             if (status == 1)
             {
-                objs.put("code", "");
+                objs.put("code", 0);
                 objs.put("message", "success");
             } else
             {
-                objs.put("code", "");
+                objs.put("code", 10002);
                 objs.put("message", "user异常");
             }
         }
@@ -227,24 +240,26 @@ public class UserAPI
      * 添加 user
      * 当 role 为 admin 时，可以删除一切合法账户(自身除外)
      * 当 role 不为 admin 时，只能删除(即注销)个人账户(保留意见)
-     * @param pare
+     * @param para
      * @return 返回显示 json
      * @author snowscattered
      */
     @RequestMapping("/delete")
     @ResponseBody
-    public Object daleteUser(@RequestBody Pare pare)
+    public Object daleteUser(@RequestBody Para para)
     {
         Map<String, Object> objs = new LinkedHashMap<>();
-        User own = pare.onw;
-        String uid = pare.uid == null ? "" : pare.uid;
+        String uid = para.uid == null ? "" : para.uid;
+        String token= para.token==null?"": para.token;
+        Info info=tokenPool.pool.get(token);
 
-        if (own == null)
+        if (info == null)
         {
-            objs.put("code", "");
+            objs.put("code", 10001);
             objs.put("message", "非法操作");
             return objs;
         }
+        User own= info.user;
 
         //checkuid必传
         int checkUid;
@@ -253,22 +268,22 @@ public class UserAPI
             checkUid = Integer.parseInt(uid);
         } catch (Exception e)
         {
-            objs.put("code", "");
+            objs.put("code", 10003);
             objs.put("message", "不正确的uid");
             return objs;
         }
 
         if (own.uid == checkUid && own.role == Role.admin)
         {
-            objs.put("code", "");
+            objs.put("code", 10005);
             objs.put("message", "操作异常");
         } else if (userService.delUser(checkUid) == 0)
         {
-            objs.put("code", "");
+            objs.put("code", 10003);
             objs.put("message", "不正确的uid");
         } else
         {
-            objs.put("code", "");
+            objs.put("code", 0);
             objs.put("message", "success");
         }
         return objs;
