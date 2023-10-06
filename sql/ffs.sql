@@ -71,13 +71,8 @@ detail varchar(100),
 date datetime,
 # 删除标志位
 del tinyint,
-<<<<<<< HEAD
-foreign key(oid) references _order(oid),
-foreign key(pid) references product(pid));
-=======
 foreign key (oid) references _order(oid),
 foreign key(uid) references user(uid));
->>>>>>> c00b77832a590c39ac5d30746de0a4f772624cb3
 
 # 伺服器内部中间表, 不对外开放
 create table listing(

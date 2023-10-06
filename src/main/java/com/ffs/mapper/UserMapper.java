@@ -19,7 +19,7 @@ public interface UserMapper {
     @Result(property="role", column="role", typeHandler=EnumOrdinalTypeHandler.class)
     User selectUserByUid(int uid);
 
-    @Select("select * from user where del=0 and username=#{user.username}")
+    @Select("select * from user where del=0 and username=#{username}")
     @Result(property="role", column="role", typeHandler=EnumOrdinalTypeHandler.class)
     User selectUserByUsername(String username);
 

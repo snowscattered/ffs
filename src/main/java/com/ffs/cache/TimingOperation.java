@@ -39,12 +39,12 @@ public class TimingOperation {
         }, 0, cleanTokenRelay);
 
         cacheTimer = new Timer();
-        cacheTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                userCache.time = System.currentTimeMillis();
-                userCache.cache = new ConcurrentHashMap<>();
-            }
-        }, 0, cleanCacheRelay);
+//        cacheTimer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                userCache.time = System.currentTimeMillis();
+//                userCache.cache = new ConcurrentHashMap<>();
+//            }
+//        }, 0, cleanCacheRelay);
     }
 }
