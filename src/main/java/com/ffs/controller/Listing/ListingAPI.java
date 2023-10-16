@@ -2,6 +2,7 @@ package com.ffs.controller.Listing;
 
 import com.ffs.cache.Info;
 import com.ffs.cache.TokenPool;
+import com.ffs.cache.UserCache;
 import com.ffs.po.Listing;
 import com.ffs.po.Role;
 import com.ffs.po.User;
@@ -34,8 +35,6 @@ public class ListingAPI
 {
     @Autowired
     ListingService listingService;
-    @Autowired
-    TokenPool tokenPool;
 
     /**
      * 查找 listing
@@ -53,14 +52,12 @@ public class ListingAPI
         String oid= para.oid==null?"": para.oid;
         String lid= para.lid==null?"": para.lid;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10031);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         int checkoid=0,checklid=0;
         if(!oid.equals(""))
@@ -133,14 +130,12 @@ public class ListingAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         Listing listing = para.listing;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", "");
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role != Role.admin)
         {
@@ -178,14 +173,12 @@ public class ListingAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         String lid = para.lid == null ? "" : para.lid;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", "");
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role!=Role.admin)
         {

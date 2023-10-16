@@ -37,6 +37,7 @@ public class UserCache {
         UserCache.cacheLease = cacheLease;
     }
 
+
     /**
      * 静态工厂方法
      * 双重锁使用确保有且仅有一个实例
@@ -89,7 +90,7 @@ public class UserCache {
      * @param user 加入 cache 中的 user
      * @author hoshinosena
      */
-    public static synchronized void addUser(User user) {
+    public static synchronized void put(User user) {
         if (pool == null) {
             return;
         }
@@ -140,7 +141,7 @@ public class UserCache {
         }
         Cache cache = pool.get(b);
         if (cache == null) {
-            bind.put(token, null);
+            bind.remove(token);
             return null;
         }
 
@@ -164,13 +165,14 @@ public class UserCache {
 
         String token = null;
         Cache cache = pool.get(uid);
-        if (cache == null) {
-            return null;
+        if (cache != null) {
+            bind.remove(cache.token);
+            token = UUID.randomUUID().toString();
+            bind.put(token, uid);
+            cache.token = token;
+            cache.tokenTime = cache.cacheTime = System.currentTimeMillis();
         }
 
-        token = UUID.randomUUID().toString();
-        bind.put(token, uid);
-        cache.tokenTime = cache.cacheTime = System.currentTimeMillis();
         return token;
     }
 
@@ -186,7 +188,7 @@ public class UserCache {
             return;
         }
 
-        pool.put(uid, null);
+        pool.remove(uid);
     }
 
     /**
@@ -205,7 +207,7 @@ public class UserCache {
         if (b == null) {
             return;
         }
-        bind.put(token, null);
+        bind.remove(token);
         // 保留 cache 缓存
 //        Cache cache = pool.get(b);
 //        if (cache == null) {
@@ -219,11 +221,14 @@ class Cache {
     public long startTime;
     public long tokenTime;
     public long cacheTime;
+    public String token;
     public User user;
 
     public Cache(User user) {
         // tokenTime 默认0
+        // token 不得为  null
         this.startTime = this.cacheTime = System.currentTimeMillis();
+        this.token = "";
         this.user = user;
     }
 }

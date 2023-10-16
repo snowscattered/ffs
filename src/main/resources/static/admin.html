@@ -3,933 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <title>admin</title>
-    <link rel="stylesheet" type="text/css" href="css/admin.css">
-    <link rel="stylesheet" type="text/css" href="css/general.css">
-
-    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
-    <script src="js/jquery-1.9.1-min.js"></script>
-    <script src="js/jquery.cookie-1.4.1-min.js"></script>
-    <script src="js/jquery-confirm-min.js"></script>
-    <script src="js/vue-3.3.4-global-min.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <!-- 桌面端兼容 -->
-    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 </head>
 <body class="broaden">
-<div id="app" class="container">
-    <div class="nav">
-        <var-tabs
-                style="--tabs-background:rgba(0,0,0,0.65)"
-                class="tabs-example-vertical"
-                layout-direction="vertical"
-                v-model:active="show">
-            <var-tab name="0" style="--tab-font-size:25px" @click="Activity(0)">系统状态</var-tab>
-            <var-tab name="1" style="--tab-font-size:25px" @click="Activity(1)">用户管理</var-tab>
-            <var-tab name="2" style="--tab-font-size:25px" @click="Activity(2)">商品管理</var-tab>
-            <var-tab name="3" style="--tab-font-size:25px" @click="Activity(3)">订单管理</var-tab>
-            <var-tab name="4" style="--tab-font-size:25px" @click="Activity(4)">评论管理</var-tab>
-            <var-tab name="5" style="--tab-font-size:25px" @click="logout">登出</var-tab>
-            <var-tab name="6" style="--tab-font-size:25px" @click="">关于</var-tab>
-            <var-tab :disabled="true"></var-tab>
-            <var-tab :disabled="true"></var-tab>
-            <var-tab :disabled="true"></var-tab>
-            <var-tab :disabled="true"></var-tab>
-        </var-tabs>
+<div id="admin" class="container">
+    <var-popup position="left" v-model:show="List">
+        <div class="popup">
+            <var-tabs
+                    style="--tabs-background:rgba(0,0,0,0.8);"
+                    class="popup-body"
+                    inactive-color="rgb(255, 255, 255, 0.7)"
+                    layout-direction="vertical"
+                    v-model:active="show">
+                <var-tab name="0" style="--tab-font-size:2rem" >系统状态</var-tab>
+                <var-tab name="1" style="--tab-font-size:2rem" >用户管理</var-tab>
+                <var-tab name="2" style="--tab-font-size:2rem" >商品管理</var-tab>
+                <var-tab name="3" style="--tab-font-size:2rem" >订单管理</var-tab>
+                <var-tab name="4" style="--tab-font-size:2rem" >评论管理</var-tab>
+                <var-tab name="5" style="--tab-font-size:2rem" @click="logout">登出</var-tab>
+                <var-tab name="6" style="--tab-font-size:2rem" @click="about">关于</var-tab>
+                <var-tab :disabled="true"></var-tab>
+                <var-tab :disabled="true"></var-tab>
+                <var-tab :disabled="true"></var-tab>
+                <var-tab :disabled="true"></var-tab>
+            </var-tabs>
+        </div>
+    </var-popup>
+    <success v-model:show="SuccessText"></success>
+    <error v-model:show="ErrorText" :code="code" :message="message"></error>
+
+    <div v-if="show == 0" class="all">
+        <div class="left Padding BST"></div>
+        <div class="left Main">
+            <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
+                <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
+            </div>
+            <div class="title"><h3 style="letter-spacing:0.8rem">用户管理</h3></div>
+            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
+                <var-button text class="left" style="height: 3rem" @click="addUser"><var-icon name="plus"/></var-button>
+                <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;
+                           --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
+                           --field-decorator-text-color:#fff"
+                           variant="outlined" size="small" placeholder="姓名" v-model="UsersName"></var-input>
+                <role-select style="margin: 0 1rem"></role-select>
+                <var-button text class="left" style="height: 3rem" @click="selectUser"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem" @click="deleteOrders"><var-icon name="delete" /></var-button>
+            </div>
+            <div class="tableBody">
+                <user-table-head style="width: 73rem;background: #fff8"></user-table-head>
+                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>
+            </div>
+        </div>
+        <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
     </div>
-<!--    <nav class="nav"></nav>-->
-    <main class="main">
-        <div class="left"></div>
-        <div v-if="show == 0" class="middle green">aaaa</div>
-        <div v-if="show == 1" class="middle orange ">
-            <div style="text-align: center"><h3>用户管理</h3></div></br>
-            <var-button class="add"><var-icon name="plus" @click="addUser"/></var-button>
-            <var-input style="float: left;width: 30%;margin: 0 0 0 10px;--input-input-height: 20px" variant="outlined" size="small" placeholder="账号" v-model="Name"></var-input>
-            <select style="float: left;width: 30%;height:36px
-            ;margin: 0 0 0 10px" v-model="Role">
-                <option selected value=""></option>
-                <option value="buyer">用户</option>
-                <option value="shop">商家</option>
-                <option value="delivery">骑手</option>
-                <option value="admin">管理员</option>
-            </select>
-            <var-button class="select"><var-icon name="magnify" @click="findUser"/></var-button>
-            <var-button class="delete"><var-icon name="delete" @click="MuldeleteUser"/></var-button>
-            <user-table-head class="head"></user-table-head>
-            <user-table class="div-scroll" style="height: 500px;margin: 0" :users="users"></user-table>
+
+
+    <div v-if="show == 1" class="all">
+        <div class="left Padding BST"></div>
+        <div class="left Main">
+            <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
+                <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
+            </div>
+            <div class="title"><h3 style="letter-spacing:0.8rem">用户管理</h3></div>
+            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
+                <var-button text class="left" style="height: 3rem" @click="addUser"><var-icon name="plus"/></var-button>
+                <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;
+                           --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
+                           --field-decorator-text-color:#fff"
+                           variant="outlined" size="small" placeholder="姓名" v-model="UsersName"></var-input>
+                <role-select style="margin: 0 1rem"></role-select>
+                <var-button text class="left" style="height: 3rem" @click="selectUser"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem" @click="deleteUsers"><var-icon name="delete" /></var-button>
+            </div>
+            <div class="tableBody">
+                <user-table-head style="width: 73rem;background: #fff8"></user-table-head>
+                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>
+            </div>
         </div>
-        <div v-if="show == 2" class="middle blue div-scroll">
-            <div style="text-align: center"><h3>商品管理</h3></div></br>
-            <var-button class="add"><var-icon name="plus" @click="addProduct"/></var-button>
-            <var-button class="select"><var-icon name="magnify" /></var-button>
-            <var-button class="delete"><var-icon name="delete" /></var-button>
-            <product-table-head class="head"></product-table-head>
-            <product-table class="div-scroll" style="height: 500px;margin: 0" :products="products"></product-table>
+        <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+    </div>
+
+
+    <div v-if="show == 2" class="all">
+        <div class="left Padding BST"></div>
+        <div class="left Main">
+            <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
+                <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
+            </div>
+            <div class="title"><h3 style="letter-spacing:0.8rem">商品管理</h3></div>
+            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
+                <var-button text class="left" style="height: 3rem" @click="addProduct"><var-icon name="plus"/></var-button>
+                <var-input style="float: left;width: 21.5rem;margin: 0 1rem;
+                           --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
+                           --field-decorator-text-color:#fff"
+                           variant="outlined" size="small" placeholder="商品名" v-model="ProductName"></var-input>
+                <var-button text class="left" style="height: 3rem" @click="selectProduct"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem" @click="deleteProducts"><var-icon name="delete" /></var-button>
+            </div>
+            <div class="tableBody">
+                <product-table-head style="width: 73rem;background: #fff8"></product-table-head>
+                <product-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :products="products"></product-table-body>
+            </div>
         </div>
-        <div v-if="show == 3" class="middle blue ">
-            <div style="text-align: center"><h3>订单管理</h3></div></br>
-            <var-button class="add"><var-icon name="magnify" /></var-button>
-            <var-button class="delete"><var-icon name="delete" /></var-button>
-            <order-table-head class="head"></order-table-head>
-            <order-table class="div-scroll" style="height: 500px;margin: 0" :orders="orders"></order-table>
+        <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+    </div>
+
+
+    <div v-if="show == 3" class="all">
+        <div class="left Padding BST"></div>
+        <div class="left Main">
+            <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
+                <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
+            </div>
+            <div class="title"><h3 style="letter-spacing:0.8rem">订单管理</h3></div>
+            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
+                <var-button text disabled class="left" style="height: 3rem"><var-icon name="plus"/></var-button>
+                <state-select style="margin: 0 1rem"></state-select>
+                <var-button text class="left" style="height: 3rem" @click="selectOrder"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem" @click="deleteOrders"><var-icon name="delete" /></var-button>
+            </div>
+            <div class="tableBody">
+                <order-table-head style="width: 73rem;background: #fff8"></order-table-head>
+                <order-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :orders="orders"></order-table-body>
+            </div>
         </div>
-        <div v-if="show == 4" class="middle blue">
-            <div style="text-align: center"><h3>评论管理</h3></div></br>
-            <var-button class="add"><var-icon name="magnify" /></var-button>
-            <var-button class="delete"><var-icon name="delete" /></var-button>
-            <review-table-head class="head"></review-table-head>
-            <review-table class="div-scroll" style="height: 500px;margin: 0"></review-table>
+        <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+    </div>
+
+
+    <div v-if="show == 4" class="all">
+        <div class="left Padding BST"></div>
+        <div class="left Main">
+            <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
+                <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
+            </div>
+            <div class="title"><h3 style="letter-spacing:0.8rem">评论管理</h3></div>
+            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
+                <var-button text disabled class="left" style="height: 3rem"><var-icon name="plus"/></var-button>
+                <state-select style="margin: 0 1rem"></state-select>
+                <var-button text class="left" style="height: 3rem" @click="selectReview"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem" @click="deleteReviews"><var-icon name="delete" /></var-button>
+            </div>
+            <div class="tableBody">
+                <review-table-head style="width: 73rem;background: #fff8"></review-table-head>
+                <review-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :reviews="review"></review-table-body>
+            </div>
         </div>
-        <div v-if="show == 5" class="middle blue">
-        </div>
-    </main>
+        <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+    </div>
 </div>
+<link rel="stylesheet" type="text/css" href="css/admin.css">
+<link rel="stylesheet" type="text/css" href="css/general.css">
+
+<link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+<script src="js/jquery-1.9.1-min.js"></script>
+<script src="js/jquery.cookie-1.4.1-min.js"></script>
+<script src="js/jquery-confirm-min.js"></script>
+<script src="js/vue-3.3.4-global-min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<!-- 桌面端兼容 -->
+<script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 <script>
     var baseURL = API.baseURL = $.cookie("baseURL")
-    var { createApp }=Vue;
+    var { createApp } = Vue;
     var app;
     var container = createApp({
         data() {
             return {
-                "token": "",
-                "pagedata": "",
-                "SelectContent": null,
-                "Name": "",
-                "Role": "",
-                "users": [],
-                "products": [],
-                "orders": [],
                 "show": 0,
+                "List": false,
+                "users": API.getUser(null,null,null,null).users,
+                "UsersName": "",
+                "Role": "",
+                "SelectUIDs": [],
+
+                "products": API.getProduct(null,null,null,null).products,
+                "ProductName": "",
+                "SelectPIDs": [],
+
+                "orders":API.getOrder(null,null).orders,
+                "OrderState": "",
+                "SelectOIDs": [],
+
+                "reviews": API.getReview(null,null).reviews,
+                "SelectRIDs": [],
+
+                "SuccessText": false,
+                "ErrorText": false,
+                "code": 100,
+                "message": "aaa"
             }
         },
-        watch: {
-            Name(newName,oldName) {
-                this.users=API.getUser(null,newName,this.Role,null).users;
-            },
-            Role(newRole,oldRole) {
-                this.users=API.getUser(null,this.Name,newRole,null).users;
-            },
-        },
         methods: {
-            Activity(TODO) {
-                if (TODO === 1) {
-                    API.getUser(null, null, null, (result) => {
-                        if (result.code === 0) {
-                            this.pagedata = "users";
-                            this.users = result.users;
-                        }
-                    })
-                } else if (TODO === 2) {
-                    API.getProduct(null,null,null, (result) => {
-                        if (result.code === 0) {
-                            this.pagedata = "products";
-                            this.products = result.products;
-                        }
-                    })
-                } else if (TODO === 3) {
-                    API.getOrder(null, (result) => {
-                        if (result.code === 0) {
-                            this.pagedata = "orders";
-                            this.orders = result.orders;
-                        }
-                    })
-                }
+            test() {
+                this.ErrorText=true;
             },
-            Refresh() {
-                if(this.pagedata === "users") {
-                    API.getUser(null, null, null, (result) => {
-                        if (result.code === 0) {
-                            this.users = result.users;
-                        }
-                    })
-                } else if(this.pagedata === "SelectByUserName"){
-                    API.getUser(null, this.SelectContent, null, (result) => {
-                        if (result.code === 0) {
-                            this.users = result.users;
-                        }
-                    })
-                } else if(this.pagedata === "SelectByUserUID"){
-                    API.getUser(this.SelectContent, null, null, (result) => {
-                        if (result.code === 0) {
-                            this.users = result.users;
-                        }
-                    })
-                } else if(this.pagedata === "products") {
-                    API.getProduct(null, null, null, (result) => {
-                        if (result.code === 0) {
-                            this.products = result.products;
-                        }
-                    })
-                } else if(this.pagedata === "orders") {
-                    API.getOrder(null,(result) => {
-                        if(result.code === 0) {
-                            this.orders = result.orders;
-                        }
-                    })
-                }
-            },
-            findUser() {
-                this.Name="";
-                this.Role=null;
-                $.confirm({
-                    title: "查找",
-                    content:
-                        "<div style='display: flex;align-items: center'><h3 style='display: inline'>根据:UID</h3>" +
-                        "<h3 style='display: inline'>查询</h3><input id='UID' style='width: 30%;display: inline'>" +
-                        "</div>",
-                    buttons: {
-                        confirm: {
-                            text: "执行",
-                            action: function () {
-                                var UID = this.$content.find("#UID").val();
-                                if(UID === "") {
-                                    app.users = API.getUser(null, null, null, null).users;
-                                } else {
-                                    var user = API.getUser(UID, null, null, null).user;
-                                    app.users = user == null ? [] : [user];
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "30%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5
-                })
-            },
-            getUserDetail(uid) {
-                var result = API.getUser(uid, null, null, null);
-                if (result.code === 0) {
-                    var user = result.user;
-                    $.dialog({
-                        title: "用户详细信息",
-                        content:
-                            "<div>" +
-                            "<div><h3>电话: " + user.tel + "</h3></div>" +
-                            "<div><h3>地址: " + user.address + "</h3></div>" +
-                            "<div><h3>备注: " + user.info + "</h3></div>" +
-                            "</div>",
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                } else {
-                    $.dialog({
-                        title: "通讯异常",
-                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                }
-            },
-            addUser() {
-                $.confirm({
-                    title: "添加新用户",
-                    content:
-                        "<div><div>" +
-                        "<h3 id='1' style='display: inline'>账号: </h3><input id='addUsername' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>密码: </h3><input id='addPassword' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>姓名: </h3><input id='addName' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>身份: </h3>" +
-                        "<select id='addRole'>" +
-                        "<option value='buyer'>用户</option>" +
-                        "<option value='shop'>商家</option>" +
-                        "<option value='delivery'>骑手</option>" +
-                        "</select>" +
-                        "</div></div>",
-                    buttons: {
-                        confirm: {
-                            text: "确认",
-                            action: function () {
-                                var user = {};
-                                var result;
-                                user.username = this.$content.find("#addUsername").val();
-                                user.password = this.$content.find("#addPassword").val();
-                                user.name = this.$content.find("#addName").val();
-                                user.role = this.$content.find("#addRole").val();
-                                result = API.addUser(user);
-                                if (result.code === 0) {
-                                    $.alert({
-                                        title: "添加成功",
-                                        content: "数据已提交并被接受",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                    app.Refresh();
-                                } else {
-                                    $.alert({
-                                        title: "添加失败",
-                                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "30%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5
-                })
-            },
-            updateUser(uid) {
-                var result=API.getUser(uid,null,null,null);
-                var user;
-                if (result.code === 0)
-                {
-                    user = result.user;
-                    $.confirm({
-                        title: "修改用户",
-                        content:
-                            "<div>" +
-                            "<div><h3 id='1' style='display: inline'>编号: </h3>" +
-                            "    <input value='" + user.uid + "' id='updateUid' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>身份: </h3>" +
-                            "<select id='updateRole'>" +
-                            "    <option " + (user.role === "buyer" ? "selected" : "") + " value='buyer'>用户</option>" +
-                            "    <option " + (user.role === "shop" ? "selected" : "") + " value='shop'>商家</option>" +
-                            "    <option " + (user.role === "delivery" ? "selected" : "") + " value='delivery'>骑手</option>" +
-                            "    <option " + (user.role === "admin" ? "selected" : "") + " value='admin'>管理员</option>" +
-                            "</select>" +
-                            "</div>" +
-                            "<div><h3 id='1' style='display: inline'>账号: </h3>" +
-                            "    <input value='" + user.username + "' id='updateUsername' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>密码: </h3>" +
-                            "    <input id='updatePassword' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>姓名: </h3>" +
-                            "    <input value='" + user.name + "' id='updateName' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>电话: </h3>" +
-                            "    <input value='" + user.tel + "' id='updateTel' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>地址: </h3>" +
-                            "    <input value='" + user.address + "' id='updateAddress' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>备注: </h3>" +
-                            "    <input value='" + user.info + "' id='updateInfo' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "</div>",
-                        buttons: {
-                            confirm: {
-                                text: "确认",
-                                action: function() {
-                                    var result;
-                                    user.role = this.$content.find("#updateRole").val();
-                                    user.password = this.$content.find("#updatePassword").val();
-                                    user.name = this.$content.find("#updateName").val();
-                                    user.tel = this.$content.find("#updateTel").val();
-                                    user.address = this.$content.find("#updateAddress").val();
-                                    user.info = this.$content.find("#updateInfo").val();
-                                    result = API.updateUser(user);
-                                    if (result.code === 0) {
-                                        $.alert({
-                                            title: "修改成功",
-                                            content: "数据已提交并被接受",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                        app.Refresh();
-                                    } else {
-                                        $.alert({
-                                            title: "修改失败",
-                                            content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                    }
-                                }
-                            },
-                            cancel: {
-                                text: "取消"
-                            }
-                        },
-                        boxWidth: "30%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5,
-                    })
-                }
-            },
-            deleteUser(uid,name,role) {
-                $.alert({
-                    title: "删除用户",
-                    content:
-                        "<div style='width: 100%'>" +
-                        "<div style='width: 100%'>" +
-                        "<h3 style='display: inline'>这将</h3>" +
-                        "<h2 style='color: red;display: inline'>不可逆</h2>" +
-                        "<h3 style='display: inline'>地删除"+ name +"(Uid: " + uid + ",Role" + role + ")</h3>" +
-                        "</div>" +
-                        "<div><h3>确认要继续执行吗?</h3></div>" +
-                        "</div>",
-                    buttons:{
-                        confirm: {
-                            text: "删除",
-                            btnClass: "btn-red",
-                            action: function() {
-                                var result;
-                                result = API.deleteUser(uid);
-                                if (result.code === 0) {
-                                    $.alert({
-                                        title: "删除成功",
-                                        content: "数据已提交并被接受",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                    app.Refresh();
-                                } else {
-                                    $.alert({
-                                        title: "删除失败",
-                                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好",
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "25%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5,
-                })
-            },
-            MuldeleteUser() {
-            },
-            getProductDetail(pid) {
-                var result = API.getProduct(pid, null, null, null);
-                if (result.code === 0) {
-                    var product = result.product;
-                    $.dialog({
-                        title: "商品详细信息",
-                        content:
-                            "<div>" +
-                            "<div><h3>图片:</h3><img class='product-img' src='img/" + product.image + "' alt='" + product.name +"'/></div>" +
-                            "<div><h3>价格: " + product.price + "</h3></div>" +
-                            "<div><h3>得分: " + product.score + "</h3></div>" +
-                            "<div><h3>备注: " + product.info + "</h3></div>" +
-                            "</div>",
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                } else {
-                    $.dialog({
-                        title: "通讯异常",
-                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                }
-            },
-            addProduct() {
-                $.confirm({
-                    title: "添加新商品",
-                    content:
-                        "<div><div>" +
-                        "<h3 id='1' style='display: inline'>商家uid: </h3><input id='addUid' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>商品名: </h3><input id='addName' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>价格: </h3><input id='addPrice' style='width: 40%;display: inline'></div>" +
-                        // "<div><h3 style='display: inline'>推荐分: </h3><input id='addScore' style='width: 40%;display: inline'></div>" +
-                        "<div><h3 style='display: inline'>图片: </h3><input type='file' id='addImage' style='width: 40%;display: inline' accept='image/*'></div>" +
-                        "<div><h3 style='display: inline'>备注: </h3><input id='addInfo' style='width: 40%;display: inline'></div>",
-                        buttons: {
-                            confirm: {
-                            text: "确认",
-                            action: function () {
-                                var product = {};
-                                var result;
-                                product.uid = this.$content.find("#addUid").val();
-                                product.name = this.$content.find("#addName").val();
-                                product.price = this.$content.find("#addPrice").val();
-                                // product.score = this.$content.find("#addScore").val();
-                                product.info = this.$content.find("#addInfo").val();
-                                product.image=API.Upload(document.getElementById("addImage")).fileName;
-                                if(product.image === "error") {
-                                    product.image="Test.png";
-                                    $.alert({
-                                        title: "图片上传失败",
-                                        content: "<h4>已经替换默认图片</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                                result = API.addProduct(product);
-                                if (result.code === 0) {
-                                    $.alert({
-                                        title: "添加成功",
-                                        content: "数据已提交并被接受",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                    app.Refresh();
-                                } else {
-                                    $.alert({
-                                        title: "添加失败",
-                                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "30%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5
-                })
-            },
-            updateProduct(pid) {
-                var result=API.getProduct(pid,null,null,null);
-                var product;
-                if (result.code === 0)
-                {
-                    product = result.product;
-                    $.confirm({
-                        title: "修改商品",
-                        content:
-                            "<div>" +
-                            "<div><h3 id='1' style='display: inline'>编号: </h3>" +
-                            "    <input value='" + product.pid + "' id='updatePid' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "</div>" +
-                            "<div><h3 id='1' style='display: inline'>商家uid: </h3>" +
-                            "    <input value='" + product.uid + "' id='updateUid' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>商品名: </h3>" +
-                            "    <input value='" + product.name + "' id='updateName' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>价格: </h3>" +
-                            "    <input value='" + product.price + "' id='updatePrice' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>推荐分: </h3>" +
-                            "    <input value='" + product.score + "' id='updateSroce' style='width: 40%;display: inline'>" +
-                            "</div>" +
 
-                            "<div><h3 style='display: inline'>图片: </h3>" +
-                            "    <input value='" + product.image + "' type='file' id='updateImage' style='width: 40%;display: inline' accept='image/*'>" +
-                            "</div>" +
+            addUser() {},
+            selectUser() {},
+            getUserDetail(uid) {},
+            updateUser(uid) {},
+            deleteUsers() {},
+            deleteUser(uid) {},
 
-                            "<div><h3 style='display: inline'>备注: </h3>" +
-                            "    <input value='" + product.info + "' id='updateInfo' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "</div>",
-                        buttons: {
-                            confirm: {
-                                text: "确认",
-                                action: function() {
-                                    var result;
-                                    product.pid = this.$content.find("#updatePid").val();
-                                    product.uid = this.$content.find("#updateUid").val();
-                                    product.name = this.$content.find("#updateName").val();
-                                    product.price = this.$content.find("#updatePrice").val();
-                                    product.score = this.$content.find("#updateSroce").val();
-                                    product.info = this.$content.find("#updateInfo").val();
-                                    result = API.updateProduct(product);
-                                    if (result.code === 0) {
-                                        $.alert({
-                                            title: "修改成功",
-                                            content: "数据已提交并被接受",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                        app.Refresh();
-                                    } else {
-                                        $.alert({
-                                            title: "修改失败",
-                                            content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                    }
-                                }
-                            },
-                            cancel: {
-                                text: "取消"
-                            }
-                        },
-                        boxWidth: "30%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5,
-                    })
-                }
-            },
-            deleteProduct(pid,name) {
-                $.alert({
-                    title: "删除商品",
-                    content:
-                        "<div style='width: 100%'>" +
-                        "<div style='width: 100%'>" +
-                        "<h3 style='display: inline'>这将</h3>" +
-                        "<h2 style='color: red;display: inline'>不可逆</h2>" +
-                        "<h3 style='display: inline'>地删除"+ name +"(Pid: " + pid + ")</h3>" +
-                        "</div>" +
-                        "<div><h3>确认要继续执行吗?</h3></div>" +
-                        "</div>",
-                    buttons:{
-                        confirm: {
-                            text: "删除",
-                            btnClass: "btn-red",
-                            action: function() {
-                                var result;
-                                result = API.deleteProduct(pid);
-                                if (result.code === 0) {
-                                    $.alert({
-                                        title: "删除成功",
-                                        content: "数据已提交并被接受",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                    app.Refresh();
-                                } else {
-                                    $.alert({
-                                        title: "删除失败",
-                                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好",
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "25%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5,
-                })
-            },
-            getOrderDetail(oid) {
-                var result = API.getOrder(oid,null);
-                if (result.code === 0) {
-                    var order = result.order;
-                    var listings = API.getListing(oid,null).listings;
-                    var len=listings.length;
-                    var head=
-                        "<div>" +
-                        "<div><h3>买家: " + order.bid + "</h3></div>" +
-                        "<div><h3>卖家: " + order.sid + "</h3></div>" +
-                        "<div><h3>骑手: " + order.did + "</h3></div>" +
-                        "</div>"+
-                        "<table>" +
-                        "    <thead>" +
-                        "        <tr>" +
-                        "            <td><h3>订单列表编号</h3></td>" +
-                        "            <td><h3>商品编号</h3></td>" +
-                        "            <td><h3>买家编号</h3></td>" +
-                        "            <td><h3>数量</h3></td>" +
-                        "        </tr>" +
-                        "    </thead>";
-                    var i=0;
-                    var text=""
-                    for(;i<len;i++)
-                    {
-                        text+=
-                            "        <tr>" +
-                            "            <td><h3>" + listings[i].lid + "</h3></td>" +
-                            "            <td><h3>" + listings[i].pid + "</h3></td>" +
-                            "            <td><h3>" + listings[i].uid + "</h3></td>" +
-                            "            <td><h3>" + listings[i].amount + "</h3></td>" +
-                            "        </tr>";
-                    }
-                    var body=
-                        "    <tbody>" +
-                        text +
-                        "    </tbody>" +
-                        "</table>"
-                    $.dialog({
-                        title: "订单详细信息",
-                        content:head+body,
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                } else {
-                    $.dialog({
-                        title: "通讯异常",
-                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                        boxWidth: "45%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5
-                    })
-                }
-            },
-            updateOrder(oid) {
-                var result=API.getOrder(oid,null);
-                var order;
-                if (result.code === 0) {
-                    order = result.order;
-                    $.confirm({
-                        title: "修改订单",
-                        content:
-                            "<div>" +
-                            "<div><h3 id='1' style='display: inline'>编号: </h3>" +
-                            "    <input value='" + order.oid + "' id='updateOid' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>交易状态: </h3>" +
-                            "<select id='updateState'>" +
-                            "    <option " + (order.state === "unpaid" ? "selected" : "") + " value='unpaid'>未支付</option>" +
-                            "    <option " + (order.state === "paid" ? "selected" : "") + " value='paid'>已支付</option>" +
-                            "    <option " + (order.state === "received" ? "selected" : "") + " value='received'>已接受</option>" +
-                            "    <option " + (order.state === "delivering" ? "selected" : "") + " value='deliverng'>已配送</option>" +
-                            "    <option " + (order.state === "finish" ? "selected" : "") + " value='finish'>已完成</option>" +
-                            "</select>" +
-                            "</div>" +
-                            "<div><h3 id='1' style='display: inline'>买家: </h3>" +
-                            "    <input value='" + order.bid + "' id='updatebid' style='width: 40%;display: inline' readonly>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>商家: </h3>" +
-                            "    <input value='" + order.sid + "' id='updatesid' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3 style='display: inline'>骑手: </h3>" +
-                            "    <input value='" + order.did + "' id='updatedid' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "<div><h3style='display: inline'>备注: </h3>" +
-                            "    <input value='" + order.info + "' id='updateInfo' style='width: 40%;display: inline'>" +
-                            "</div>" +
-                            "</div>",
-                        buttons: {
-                            confirm: {
-                                text: "确认",
-                                action: function () {
-                                    var result;
-                                    order.oid = this.$content.find("#updateOid").val();
-                                    order.state = this.$content.find("#updateState").val();
-                                    order.bid = this.$content.find("#updatebid").val();
-                                    order.sid = this.$content.find("#updatesid").val();
-                                    order.did = this.$content.find("#updatedid").val();
-                                    order.info = this.$content.find("#updateInfo").val();
-                                    result = API.updateOrder(order);
-                                    if (result.code === 0) {
-                                        $.alert({
-                                            title: "修改成功",
-                                            content: "数据已提交并被接受",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                        app.Refresh();
-                                    } else {
-                                        $.alert({
-                                            title: "修改失败",
-                                            content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                            buttons: {
-                                                ok: {
-                                                    text: "好"
-                                                }
-                                            },
-                                            boxWidth: "30%",
-                                            useBootstrap: false,
-                                            theme: "material",
-                                            animationBounce: 1.5
-                                        });
-                                    }
-                                }
-                            },
-                            cancel: {
-                                text: "取消"
-                            }
-                        },
-                        boxWidth: "30%",
-                        useBootstrap: false,
-                        theme: "material",
-                        animationBounce: 1.5,
-                    })
-                }
-            },
-            deleteOrder(oid) {
-                $.alert({
-                    title: "删除订单",
-                    content:
-                        "<div style='width: 100%'>" +
-                        "<div style='width: 100%'>" +
-                        "<h3 style='display: inline'>这将</h3>" +
-                        "<h2 style='color: red;display: inline'>不可逆</h2>" +
-                        "<h3 style='display: inline'>地删除"+ name +"(Oid: " + oid + ")</h3>" +
-                        "</div>" +
-                        "<div><h3>确认要继续执行吗?</h3></div>" +
-                        "</div>",
-                    buttons:{
-                        confirm: {
-                            text: "删除",
-                            btnClass: "btn-red",
-                            action: function() {
-                                var result;
-                                result = API.deleteOrder(oid);
-                                if (result.code === 0) {
-                                    $.alert({
-                                        title: "删除成功",
-                                        content: "数据已提交并被接受",
-                                        buttons: {
-                                            ok: {
-                                                text: "好"
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                    app.Refresh();
-                                } else {
-                                    $.alert({
-                                        title: "删除失败",
-                                        content: "<h4>错误代码: " + result.code + "</h4><h4>错误原因: " + result.message + "</h4>",
-                                        buttons: {
-                                            ok: {
-                                                text: "好",
-                                            }
-                                        },
-                                        boxWidth: "30%",
-                                        useBootstrap: false,
-                                        theme: "material",
-                                        animationBounce: 1.5
-                                    });
-                                }
-                            }
-                        },
-                        cancel: {
-                            text: "取消"
-                        }
-                    },
-                    boxWidth: "25%",
-                    useBootstrap: false,
-                    theme: "material",
-                    animationBounce: 1.5,
-                })
+            addProduct() {},
+            selectProduct() {},
+            getProductDetail(pid) {},
+            updateProduct(pid) {},
+            deleteProducts() {},
+            deleteProduct(pid) {},
+
+            selectOrder() {},
+            getOrderDetail(oid) {},
+            updateOrder(oid) {},
+            deleteOrders() {},
+            deleteOrder(oid) {},
+
+            selectReview() {},
+            getReviewDetail(rid) {},
+            updateReview(rid) {},
+            deleteReviews() {},
+            deleteReview(rid) {},
+
+            img(image) {
+                return "img/"+image;
             },
             logout() {
                 $.ajax({
                     type: "POST",
                     url: baseURL + "to_logout",
+                    // 阻塞线程避免登出数据与
+                    // 访问根的请求到达次序不同
                     async: false
                 });
                 var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
@@ -940,215 +247,328 @@
                 sessionStorage.clear();
                 window.location.href = baseURL;
             },
-            about() {
+            about() {},
+        },
+        watch: {
+            UsersName(newUsersName,oldUsersName) {
+                this.users=API.getUser(null,newUsersName,this.Role,null).users
+            },
+            Role(newRole,oldRole) {
+                this.users=API.getUser(null,this.UsersName,newRole,null).users
+            },
+            ProductName(newProductName,oldProductName) {
 
-            }
+            },
+            OrderState(newOrderState,oldOrderState) {
+
+            },
         },
         mounted() {
-            app = this;
+            app=this;
         },
         components: {
-            "user-table-head": {
+            "RoleSelect": {
                 template:
-                    "  <var-table>\n" +
-                    "    <thead>\n" +
-                    "      <tr>\n" +
-                    "        <th>编号</th>\n" +
-                    "        <th>账号</th>\n" +
-                    "        <th>身份</th>\n" +
-                    "        <th>姓名</th>\n" +
-                    "        <th>详细信息</th>\n" +
-                    "        <th>修改</th>\n" +
-                    "        <th>删除</th>\n" +
-                    "      </tr>\n" +
-                    "    </thead>\n" +
-                    "  </var-table>",
+                    "      <var-select style='float: left;width: 21.5rem;--select-scroller-background:#0000;" +
+                    "                  --field-decorator-outlined-small-padding-top:0.7rem;--field-decorator-outlined-small-padding-bottom:0.7rem;" +
+                    "                  --field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;--field-decorator-text-color:#fff'" +
+                    "                  variant='outlined' size='small' placeholder='身份' v-model='role'>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"\")'    label='' value='' />" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"buyer\")' label='用户' value='buyer' />" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"shop\")' label='商家' value='shop'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"delivery\")' label='骑手' value='delivery'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"admin\")' label='管理员' value='admin'/>" +
+                    "      </var-select>",
+                data() {
+                    return{
+                        "role": "",
+                    }
+                },
+                methods: {
+                    res(data) {
+                        app.Role=data
+                    }
+                },
+                // watch: {
+                //     role(newrole,oldrole) {
+                //         app.role=newrole;
+                //     }
+                // }
             },
-            "user-table": {
+            "UserTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>用户名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>身份</th>" +
+                    "        <th style='text-align: center;width: 50rem'>姓名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
+                    "        <th style='text-align: center;width: 50rem'>操作</th>" +
+                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>"
+            },
+            "UserTableBody": {
                 props: ["users"],
                 template:
-                    "  <var-table>\n" +
-                    "    <tbody v-for='item in users' :key='item.uid'>\n" +
-                    "      <tr>\n" +
-                    "        <th>{{ item.uid }}</th>\n" +
-                    "        <th>{{ item.username }}</th>\n" +
-                    "        <th>{{ item.role}}</th>\n" +
-                    "        <th>{{ item.name}}</th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='getUserDetail(item.uid)'>" +
-                    "                <var-icon name='view' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='updateUser(item.uid)'>" +
-                    "                <var-icon name='cog' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='deleteUser(item.uid,item.name,item.role)'>" +
-                    "                <var-icon name='delete' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "      </tr>\n" +
-                    "    </tbody>\n" +
-                    "  </var-table>",
+                    "<var-table>" +
+                    "<var-checkbox-group ref='users' v-model='SelectUIDs'>"+
+                    "    <tbody v-for='item in users' :key='item.uid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox :checked-value='item.uid'></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.uid }}</td>" +
+                    "        <td style='text-align: center;width: 55rem;word-break: break-all'>{{ item.username }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.role }}</td>" +
+                    "        <td style='text-align: center;width: 55rem;word-break: break-all'>{{ item.name }}</td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='getUserDetail(item.uid)'><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='updateUser(item.uid)'><var-icon name='cog' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='deleteUser(item.uid)'><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</var-checkbox-group>" +
+                    "</var-table>",
                 data() {
                     return {
-                        "selectUser":[],
+                        "SelectUIDs": [],
                     }
                 },
+                watch: {
+                    SelectUIDs(newSelectUIDs,oldSelectUIDs) {
+                        app.SelectUIDs=this.SelectUIDs.sort((a, b) => a - b);
+                    },
+                },
                 methods: {
-                    getUserDetail(uid) {
-                        app.getUserDetail(uid)
-                    },
-                    updateUser(uid) {
-                        app.updateUser(uid)
-                    },
-                    deleteUser(uid,name,role) {
-                        app.deleteUser(uid,name,role)
-                    },
-                }
+                    getUserDetail(uid) { app.getUserDetail(uid) },
+                    updateUser(uid) { app.updateUser(uid) },
+                    deleteUser(uid) { app.deleteUser(uid) },
+                },
             },
-            "product-table-head": {
+
+            "ProductTableHead": {
                 template:
-                    "  <var-table>\n" +
-                    "    <thead>\n" +
-                    "      <tr>\n" +
-                    "        <th>编号</th>\n" +
-                    "        <th>商家名</th>\n" +
-                    "        <th>商品名</th>\n" +
-                    "        <th>详细信息</th>\n" +
-                    "        <th>修改</th>\n" +
-                    "        <th>删除</th>\n" +
-                    "      </tr>\n" +
-                    "    </thead>\n" +
-                    "  </var-table>",
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商家编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商品名</th>" +
+                    "        <th style='text-align: center;width: 30rem'>详细信息</th>" +
+                    "        <th style='text-align: center;width: 30rem'>操作</th>" +
+                    "        <th style='text-align: center;width: 30rem'>删除</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>"
             },
-            "product-table": {
+            "ProductTableBody": {
                 props: ["products"],
                 template:
-                    "  <var-table>\n" +
-                    "    <tbody v-for='item in products' :key='item.pid'>\n" +
-                    "      <tr>\n" +
-                    "        <th>{{ item.pid }}</th>\n" +
-                    "        <th>{{ item.uid }}</th>\n" +
-                    "        <th>{{ item.name }}</th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='getProductDetail(item.pid)'>" +
-                    "                <var-icon name='view' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='updateProduct(item.pid)'>" +
-                    "                <var-icon name='cog' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='deleteProduct(item.pid,item.name)'>" +
-                    "                <var-icon name='delete' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "      </tr>\n" +
-                    "    </tbody>\n" +
-                    "  </var-table>",
+                    "<var-table>" +
+                    "<var-checkbox-group ref='products' v-model='SelectPIDs'>"+
+                    "    <tbody v-for='item in products' :key='item.pid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox :checked-value='item.pid'></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 80rem;word-break: break-all'>{{ item.pid }}</td>" +
+                    "        <td style='text-align: center;width: 80rem;word-break: break-all'>{{ item.uid }}</td>" +
+                    "        <td style='text-align: center;width: 80rem;word-break: break-all'>{{ item.name }}</td>" +
+                    "        <td style='text-align: center;width: 30rem;word-break: break-all'><var-button text @click='getProductDetail(item.pid)'><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 30rem;word-break: break-all'><var-button text @click='updateProduct(item.pid)'><var-icon name='cog' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 30rem;word-break: break-all'><var-button text @click='deleteProduct(item.pid)'><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</var-checkbox-group>"+
+                    "</var-table>",
                 data() {
                     return {
-
+                        "SelectPIDs": [],
+                    }
+                },
+                watch: {
+                    SelectPIDs(newSelectPIDs,oldSelectPIDs) {
+                        app.SelectPIDs=this.SelectPIDs.sort((a, b) => a - b);
+                    },
+                },
+                methods: {
+                    getProductDetail(pid) { app.getProductDetail(pid) },
+                    updateProduct(pid) { app.updateProduct(pid) },
+                    deleteProduct(pid) { app.deleteProduct(pid) },
+                },
+            },
+            
+            "StateSelect": {
+                template:
+                    "      <var-select style='float: left;width: 21.5rem;--select-scroller-background:#0000;" +
+                    "                  --field-decorator-outlined-small-padding-top:0.7rem;--field-decorator-outlined-small-padding-bottom:0.7rem;" +
+                    "                  --field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;--field-decorator-text-color:#fff'" +
+                    "                  variant='outlined' size='small' placeholder='状态' v-model='OrderState'>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"\")'    label='' value='' />" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"unpiad\")' label='未支付' value='unpaid' />" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"piad\")' label='已支付' value='piad'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"received\")' label='已接收' value='received'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"delivering\")' label='正配送' value='delivering'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"finish\")' label='已完成' value='finish'/>" +
+                    "        <var-option style='--option-height:2rem' @click='res(\"cancel\")' label='未完成' value='cancel'/>" +
+                    "      </var-select>",
+                data() {
+                    return{
+                        "OrderState": "",
                     }
                 },
                 methods: {
-                    getProductDetail(pid) {
-                        app.getProductDetail(pid)
-                    },
-                    updateProduct(pid) {
-                        app.updateProduct(pid)
-                    },
-                    deleteProduct(pid,name) {
-                        app.deleteProduct(pid,name)
-                    },
-                }
+                    res(data) {
+                        app.OrderState=data
+                    }
+                },
             },
-            "order-table-head": {
+            "OrderTableHead": {
                 template:
-                    "  <var-table>\n" +
-                    "    <thead>\n" +
-                    "      <tr>\n" +
-                    "        <th>编号</th>\n" +
-                    "        <th>付款凭证</th>\n" +
-                    "        <th>交易状态</th>" +
-                    "        <th>时间</th>\n" +
-                    "        <th>备注</th>\n" +
-                    "        <th>详细信息</th>\n" +
-                    "        <th>修改</th>\n" +
-                    "        <th>删除</th>\n" +
-                    "      </tr>\n" +
-                    "    </thead>\n" +
-                    "  </var-table>",
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox readonly></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>付款凭证</th>" +
+                    "        <th style='text-align: center;width: 50rem'>交易状态</th>" +
+                    "        <th style='text-align: center;width: 50rem'>时间</th>" +
+                    "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
+                    "        <th style='text-align: center;width: 50rem'>操作</th>" +
+                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>"
             },
-            "order-table": {
+            "OrderTableBody": {
                 props: ["orders"],
                 template:
-                    "  <var-table>\n" +
-                    "    <tbody v-for='item in orders' :key='item.oid'>\n" +
-                    "      <tr>\n" +
-                    "        <th>{{ item.oid }}</th>\n" +
-                    "        <th>{{ item.tid }}</th>\n" +
-                    "        <th>{{ item.state }}</th>\n" +
-                    "        <th>{{ item.date }}</th>\n" +
-                    "        <th>{{ item.info }}</th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='getOrderDetail(item.oid)'>" +
-                    "                <var-icon name='view' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='updateOrder(item.oid)'>" +
-                    "                <var-icon name='cog' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "        <th><a href='javascript:void(0)' @click='deleteOrder(item.oid)'>" +
-                    "                <var-icon name='delete' color='#000'/>" +
-                    "            </a></th>\n" +
-                    "      </tr>\n" +
-                    "    </tbody>\n" +
+                    "<var-table>" +
+                    "<var-checkbox-group ref='products' v-model='SelectPIDs'>"+
+                    "    <tbody v-for='item in orders' :key='item.oid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox :checked-value='item.oid'></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
+                    "        <td style='text-align: center;width: 60rem;word-break: break-all'>{{ item.tid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.state }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='updateOrder(item.oid)'><var-icon name='cog' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='deleteOrder(item.oid)'><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</var-checkbox-group>"+
+                    "</var-table>",
+                data() {
+                    return {
+                        "SelectOIDs": [],
+                    }
+                },
+                watch: {
+                    SelectOIDs(newSelectOIDs,oldSelectOIDs) {
+                        app.SelectOIDs=this.SelectOIDs.sort((a, b) => a - b);
+                    },
+                },
+                methods: {
+                    getOrderDetail(oid) { app.getOrderDetail(oid) },
+                    updateOrder(oid) { app.updateOrder(oid) },
+                    deleteOrder(oid) { app.deleteOrder(oid) },
+                },
+            },
+
+            "ReviewTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>订单</th>" +
+                    "        <th style='text-align: center;width: 50rem'>用户</th>" +
+                    "        <th style='text-align: center;width: 50rem'>评论</th>" +
+                    "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
+                    "        <th style='text-align: center;width: 50rem'>操作</th>" +
+                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>"
+            },
+            "ReviewTableBody": {
+                props: ["reviews"],
+                template:
+                    "<var-table>" +
+                    "    <tbody v-for='item in reviews' :key='item.oid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.rid }}</td>" +
+                    "        <td style='text-align: center;width: 65rem;word-break: break-all'>{{ item.oid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.uid }}</td>" +
+                    "        <td style='text-align: center;width: 65rem;word-break: break-all'>{{ item.detail }}</td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='getReviewDetail(item.rid)'><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='updateReview(item.rid)'><var-icon name='cog' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all'><var-button text @click='deleteReview(item.rid)'><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
                     "  </var-table>",
                 data() {
                     return {
-
+                        "SelectRIDs": [],
                     }
                 },
+                watch: {
+                    SelectRIDs(newSelectRIDs,oldSelectRIDs) {
+                        app.SelectRIDs=this.SelectRIDs.sort((a, b) => a - b);
+                    },
+                },
                 methods: {
-                    getOrderDetail(oid) {
-                        app.getOrderDetail(oid)
-                    },
-                    updateOrder(oid) {
-                        app.updateOrder(oid)
-                    },
-                    deleteOrder(oid) {
-                        app.deleteOrder(oid)
+                    getReviewDetail(rid) { app.getReviewDetail(rid) },
+                    updateReview(rid) { app.updateReview(rid) },
+                    deleteReview(rid) { app.deleteReview(rid) },
+                },
+            },
+
+            "success": {
+                template:
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='success' title='成功' description='提交成功'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='success' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.SuccessText=!app.SuccessText;
                     }
                 }
             },
-            "review-table-head": {
+            "error": {
+                props: ["code","message"],
                 template:
-                    "  <var-table>\n" +
-                    "    <thead>\n" +
-                    "      <tr>\n" +
-                    "        <th>编号</th>\n" +
-                    "        <th>订单编号</th>\n" +
-                    "        <th>身份</th>\n" +
-                    "        <th>姓名</th>\n" +
-                    "        <th>详细信息</th>\n" +
-                    "        <th>修改</th>\n" +
-                    "        <th>删除</th>\n" +
-                    "      </tr>\n" +
-                    "    </thead>\n" +
-                    "  </var-table>",
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='error' title='错误' description='提交失败'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center;margin: 0 0 2rem 0'>" +
+                    "                  <h3>错误代码:{{ code }}&emsp;&emsp;&emsp;错误信息:{{ message }}</h3><br/>" +
+                    "              </div>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='danger' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.ErrorText=!app.ErrorText;
+                    }
+                }
             },
-            "review-table": {
-                props: ["reviews"],
-                template:
-                    "  <var-table>\n" +
-                    "    <tbody>\n" +
-                    "      <tr>\n" +
-                    "        <th>编号</th>\n" +
-                    "        <th>用户名</th>\n" +
-                    "        <th>身份</th>\n" +
-                    "        <th>姓名</th>\n" +
-                    "        <th>详细信息</th>\n" +
-                    "        <th>修改</th>\n" +
-                    "        <th>删除</th>\n" +
-                    "      </tr>\n" +
-                    "    </tbody>\n" +
-                    "  </var-table>",
-            },
-        },
+        }
     })
-    container.use(Varlet).mount("#app")
+    container.use(Varlet).mount("#admin");
 </script>
 </body>
 </html>

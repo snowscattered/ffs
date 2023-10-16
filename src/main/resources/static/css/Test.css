@@ -1,0 +1,70 @@
+html {
+    font-size: 14px;
+    /*overflow-x: hidden;*/
+}
+
+html body{
+    transform-style: preserve-3d;
+    width: 109rem;
+}
+.popup-class{
+    width: 300px;
+}
+.tabs {
+    top: 0;
+    left: 0;
+    position: fixed;
+    width: 300px !important;
+    height: 100% !important;
+}
+.div-info {
+    margin: 0 17.5rem;
+    width: 74.6rem;
+    height: 48.6rem;
+}
+.title {
+    height: 5.5rem;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.add
+{
+    float: left;
+}
+.Select
+{
+    margin: 0 0 0 0.7rem;
+    float: left;
+}
+.delete
+{
+    float: right;
+}
+.box
+{
+    width: 18.5rem;
+    height: 22rem;
+    float: left;
+    margin: 2rem;
+}
+.box:hover
+{
+    box-shadow: 0.3rem 0.3rem 0.5rem 0 rgb(0,0,0,0.4);
+    transition: 0.6s;
+    transform: translate(0,-2rem);
+}
+.List:hover{background: #fff}
+
+
+
+.tran
+{
+    transform: rotateY(45deg)
+}
+.tran:hover
+{
+    transition: 1s;
+    transform: rotateY(0deg)
+}

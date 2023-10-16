@@ -2,6 +2,7 @@ package com.ffs.controller.Product;
 
 import com.ffs.cache.Info;
 import com.ffs.cache.TokenPool;
+import com.ffs.cache.UserCache;
 import com.ffs.po.Product;
 import com.ffs.po.Role;
 import com.ffs.po.User;
@@ -35,8 +36,6 @@ public class ProductAPI
     @Autowired
     ProductService productService;
 
-    @Autowired
-    TokenPool tokenPool;
 
     /**
      * 查找 Product
@@ -57,14 +56,12 @@ public class ProductAPI
         String name = para.name == null ? "" : para.name;
         String pid = para.pid == null ? "" : para.pid;
         String token=para.token==null? "" :para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
         //初始化可能会有问题
         int checkuid = 0, checkpid = 0;
         if (!uid.equals(""))
@@ -123,7 +120,7 @@ public class ProductAPI
                 objs.put("message", "success");
             } else
             {
-                objs.put("product", productService.findProducts(checkpid));
+                objs.put("product", productService.findProduct(checkpid));
                 objs.put("code", 0);
                 objs.put("message", "success");
             }
@@ -146,6 +143,13 @@ public class ProductAPI
                 objs.put("code",0);
                 objs.put("message","success");
             }
+            else if(!pid.equals(""))
+            {
+                Product product= productService.findProduct(checkpid);
+                objs.put("product",product.uid==checkuid?"":product);
+                objs.put("code",0);
+                objs.put("message","success");
+            }
             else if(!name.equals(""))
             {
                 List<Product> products=productService.findProducts(name);
@@ -153,13 +157,6 @@ public class ProductAPI
                     if(product.uid!=checkuid)
                         products.remove(product);
                 objs.put("products",products);
-                objs.put("code",0);
-                objs.put("message","success");
-            }
-            else if(!pid.equals(""))
-            {
-                Product product= productService.findProduct(checkpid);
-                objs.put("product",product.uid==checkuid?"":product);
                 objs.put("code",0);
                 objs.put("message","success");
             }
@@ -181,14 +178,12 @@ public class ProductAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         Product product = para.product;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role == Role.delivery || own.role == Role.buyer)
         {
@@ -231,14 +226,12 @@ public class ProductAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         Product product = para.product;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role == Role.delivery || own.role == Role.buyer)
         {
@@ -281,14 +274,12 @@ public class ProductAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         String pid = para.pid == null ? "" : para.pid;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role == Role.delivery || own.role == Role.buyer)
         {

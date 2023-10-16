@@ -2,6 +2,7 @@ package com.ffs.controller.User;
 
 import com.ffs.cache.Info;
 import com.ffs.cache.TokenPool;
+import com.ffs.cache.UserCache;
 import com.ffs.po.Role;
 import com.ffs.po.User;
 import com.ffs.service.UserService;
@@ -34,9 +35,6 @@ public class UserAPI
     @Autowired
     UserService userService;
 
-    @Autowired
-    TokenPool tokenPool;
-
     /**
      * 获取 user
      * 当 Role 为 buyer 时,分别用于获取自己和所有商家或者指定商家的 user,并分页
@@ -55,14 +53,13 @@ public class UserAPI
         String name = para.name == null ? "" : para.name;
         String role = para.role == null ? "" : para.role;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
+        User own = UserCache.getUser(token);
+        if (own == null) {
             objs.put("code", 10001);
             objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
+
         if (own.role == Role.admin)
         {
             List<User> users;
@@ -84,6 +81,7 @@ public class UserAPI
             } else
             {
                 int checkUid;
+                User user;
                 try
                 {
                     checkUid = Integer.parseInt(uid);
@@ -93,7 +91,12 @@ public class UserAPI
                     objs.put("message", "不正确的uid");
                     return objs;
                 }
-                objs.put("user", userService.findUser(checkUid));
+                user = UserCache.getUser(checkUid);
+                if (user == null) {
+                    user = userService.findUser(checkUid);
+                    UserCache.put(user);
+                }
+                objs.put("user", user);
                 objs.put("code", 0);
                 objs.put("message", "success");
             }
@@ -145,14 +148,12 @@ public class UserAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         User other = para.other;
         String token=para.token==null?"":para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null || other == null)
-        {
+        User own = UserCache.getUser(token);
+        if (own == null) {
             objs.put("code", 10001);
             objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (own.role != Role.admin)
         {
@@ -192,15 +193,12 @@ public class UserAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         User other = para.other;
         String token=para.token==null?"":para.token;
-        Info info=tokenPool.pool.get(token);
-
-        if (info == null || other == null)
-        {
+        User own = UserCache.getUser(token);
+        if (own == null) {
             objs.put("code", 10001);
-            objs.put("message", "非法操作");
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
         //待修改
         if (own.role == Role.admin)
         {
@@ -251,15 +249,12 @@ public class UserAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         String uid = para.uid == null ? "" : para.uid;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-
-        if (info == null)
-        {
+        User own = UserCache.getUser(token);
+        if (own == null) {
             objs.put("code", 10001);
-            objs.put("message", "非法操作");
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         //checkuid必传
         int checkUid;

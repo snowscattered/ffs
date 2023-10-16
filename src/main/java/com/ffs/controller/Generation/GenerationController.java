@@ -2,6 +2,7 @@ package com.ffs.controller.Generation;
 
 import com.ffs.cache.Info;
 import com.ffs.cache.TokenPool;
+import com.ffs.cache.UserCache;
 import com.ffs.po.Role;
 import com.ffs.po.User;
 import com.ffs.service.UserService;
@@ -34,8 +35,6 @@ public class GenerationController
     String baseURL;
     @Autowired
     UserService userService;
-    @Autowired
-    TokenPool tokenPool;
     RateLimiter rateLimiter;
 
     public GenerationController(@Value("${AccessControlLimit}") double limit) {
@@ -118,13 +117,10 @@ public class GenerationController
             objs.put("code", 10001);
             objs.put("message", "非法操作");
         } else {
-            String token = UUID.randomUUID().toString();
+            String token;
             synchronized (this) {
-                if (tokenPool.bind.containsKey(checkUser.uid)) {  // 刷新token
-                    tokenPool.pool.remove(tokenPool.bind.get(checkUser.uid));
-                }
-                tokenPool.bind.put(checkUser.uid, token);
-                tokenPool.pool.put(token, new Info(checkUser));
+                UserCache.put(checkUser);
+                token = UserCache.getToken(checkUser.uid);
             }
             req.getSession().setAttribute("isLogin", true);
             rsp.addCookie(new Cookie("username", username));

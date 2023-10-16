@@ -297,7 +297,7 @@ class API {
         })
         return obj;
     }
-    static addProduct(product){
+    static addProduct(product) {
         var obj;
         $.ajax({
             type: "POST",
@@ -439,8 +439,7 @@ class API {
     }
 
 
-    static getOrder(oid, callback, args)
-    {
+    static getOrder(oid, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",
@@ -495,8 +494,7 @@ class API {
         })
         return obj;
     }
-    static updateOrder(order, callback, args)
-    {
+    static updateOrder(order, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",
@@ -551,8 +549,7 @@ class API {
         })
         return obj;
     }
-    static deleteOrder(oid, callback, args)
-    {
+    static deleteOrder(oid, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",
@@ -610,6 +607,62 @@ class API {
 
 
     static getListing(oid, callback, args) {
+        if(callback !== null && callback !== undefined) {
+            $.ajax({
+                type: "POST",
+                url: this.baseURL + "api/listing/get",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "token": $.cookie("token"),
+                    "oid": oid,
+                }),
+                timeout: 2000,
+                dataType: "json",
+                success: function (data) {
+                    callback(data, args)
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus === "success") {
+                        return;
+                    } else if (textStatus === "timeout") {
+                        obj = {"code": -1, "message": "超时"};
+                        callback(obj, args)
+                    } else {
+                        obj = {"code": -1, "message": "客户端错误"};
+                        callback(obj,args)
+                    }
+                }
+            })
+        }
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/listing/get",
+            contentType: "application/json",
+            async: false,
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "oid": oid,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            }
+        })
+        return obj;
+    }
+
+    static getReview(oid, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",

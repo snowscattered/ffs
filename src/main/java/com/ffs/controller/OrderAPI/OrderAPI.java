@@ -2,6 +2,7 @@ package com.ffs.controller.OrderAPI;
 
 import com.ffs.cache.Info;
 import com.ffs.cache.TokenPool;
+import com.ffs.cache.UserCache;
 import com.ffs.po.*;
 import com.ffs.service.ListingService;
 import com.ffs.service.OrderService;
@@ -37,8 +38,6 @@ public class OrderAPI
     OrderService orderService;
     @Autowired
     ListingService listingService;
-    @Autowired
-    TokenPool tokenPool;
 
     /**
      * 查找 order
@@ -57,14 +56,12 @@ public class OrderAPI
         Map<String, Object> objs = new LinkedHashMap<>();
         String oid = para.oid==null?"":para.oid;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10021);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         int checkoid = 0;
         if (!oid.equals(""))
@@ -154,14 +151,12 @@ public class OrderAPI
         Order order = para.order;
         List<Listing> listings = para.listings;
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", "");
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
         //
         if (own.role != Role.buyer)
         {
@@ -215,14 +210,12 @@ public class OrderAPI
 //        String oid= para.oid == null ?"":para.oid;
 //        State state= para.state == null ? null:State.valueOf(para.state);
         String token= para.token==null?"": para.token;
-        Info info=tokenPool.pool.get(token);
-        if (info == null)
-        {
-            objs.put("code", 10021);
-            objs.put("message", "非法操作");
+        User own = UserCache.getUser(token);
+        if (own == null) {
+            objs.put("code", 10001);
+            objs.put("message", "非法操作1");
             return objs;
         }
-        User own= info.user;
 
         if (order == null)
         {

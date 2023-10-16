@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>guest</title>
+    <link rel="stylesheet" type="text/css" href="css/guest.css">
+    <link rel="stylesheet" type="text/css" href="css/general.css">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+</head>
+<body class="broaden">
+<canvas></canvas>
+<div id="guest" class="container">
+    <var-sticky>
+        <div class="Top-Bar">
+            <var-tabs class="Bar-Left"
+                      style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
+                       --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="login"><var-icon name="card-account-details" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="register"><var-icon name="plus"/></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="about"><var-icon name="help-circle"/></var-tab>
+            </var-tabs>
+            <var-tabs class="Bar-Right"
+                      style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
+                      --tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem">
+                <var-tab disabled style="--tab-font-size:2rem;--tab-padding:2rem" name="0"><var-icon name="home" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="listFN=!listFN"><var-icon name="cart" /></var-tab>
+                <var-tab disabled style="--tab-font-size:2rem;--tab-padding:2rem" name="2"><var-icon name="notebook" /></var-tab>
+            </var-tabs>
+        </div>
+    </var-sticky>
+    <success v-model:show="SuccessText"></success>
+    <error v-model:show="ErrorText" :code="code" :message="message"></error>
+
+    <div class="swipe-example">
+        <var-swipe style="height: 25rem" navigation="hover" :autoplay="5000">
+            <var-swipe-item>
+                <img class="swipe-example-image" src="img/0ebdb264842f4d84bb4d46d6d.png">
+            </var-swipe-item>
+            <var-swipe-item>
+                <img class="swipe-example-image" src="img/41fe261291524a87b38cf55e0.png">
+            </var-swipe-item>
+            <var-swipe-item>
+                <img class="swipe-example-image" src="img/5a3c340c23f04eefa61f223bf.png">
+            </var-swipe-item>
+        </var-swipe>
+    </div>
+    <div style="width: 90rem;margin: 0 auto">
+        <product-list :products="products"></product-list>
+    </div>
+    <var-popup style="height: 48.7rem;background: #fff8;margin: 5rem 0 0 0"
+               position="right" v-model:show="listFN">
+        <buy-list :listings="listings" style="background: #0000;"></buy-list>
+        <var-button text style="height: 4rem;width: 45rem;text-align: center" @click="login">
+            <var-icon name="check" size="55"></var-icon>
+        </var-button>
+    </var-popup>
+    <var-back-top :duration="300" />
+</div>
+<script>
+    $(function(){
+        var canvas = document.querySelector('canvas'),
+            ctx = canvas.getContext('2d')
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.lineWidth = .3;
+        ctx.strokeStyle = (new Color(150)).style;
+
+        var mousePosition = {
+            x: 30 * canvas.width / 100,
+            y: 30 * canvas.height / 100
+        };
+
+        var dots = {
+            nb: 750,
+            distance: 50,
+            d_radius: 100,
+            array: []
+        };
+
+        function colorValue(min) {
+            return Math.floor(Math.random() * 255 + min);
+        }
+
+        function createColorStyle(r,g,b) {
+            return 'rgba(' + r + ',' + g + ',' + b + ', 0.8)';
+        }
+
+        function mixComponents(comp1, weight1, comp2, weight2) {
+            return (comp1 * weight1 + comp2 * weight2) / (weight1 + weight2);
+        }
+
+        function averageColorStyles(dot1, dot2) {
+            var color1 = dot1.color,
+                color2 = dot2.color;
+
+            var r = mixComponents(color1.r, dot1.radius, color2.r, dot2.radius),
+                g = mixComponents(color1.g, dot1.radius, color2.g, dot2.radius),
+                b = mixComponents(color1.b, dot1.radius, color2.b, dot2.radius);
+            return createColorStyle(Math.floor(r), Math.floor(g), Math.floor(b));
+        }
+
+        function Color(min) {
+            min = min || 0;
+            this.r = colorValue(min);
+            this.g = colorValue(min);
+            this.b = colorValue(min);
+            this.style = createColorStyle(this.r, this.g, this.b);
+        }
+
+        function Dot(){
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+
+            this.vx = -.5 + Math.random();
+            this.vy = -.5 + Math.random();
+
+            this.radius = Math.random() * 2;
+
+            this.color = new Color();
+        }
+
+        Dot.prototype = {
+            draw: function(){
+                ctx.beginPath();
+                ctx.fillStyle = this.color.style;
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fill();
+            }
+        };
+
+        function createDots(){
+            for(i = 0; i < dots.nb; i++){
+                dots.array.push(new Dot());
+            }
+        }
+
+        function moveDots() {
+            for(i = 0; i < dots.nb; i++){
+
+                var dot = dots.array[i];
+
+                if(dot.y < 0 || dot.y > canvas.height){
+                    dot.vx = dot.vx;
+                    dot.vy = - dot.vy;
+                }
+                else if(dot.x < 0 || dot.x > canvas.width){
+                    dot.vx = - dot.vx;
+                    dot.vy = dot.vy;
+                }
+                dot.x += dot.vx;
+                dot.y += dot.vy;
+            }
+        }
+
+        function connectDots() {
+            for(i = 0; i < dots.nb; i++){
+                for(j = 0; j < dots.nb; j++){
+                    i_dot = dots.array[i];
+                    j_dot = dots.array[j];
+
+                    if((i_dot.x - j_dot.x) < dots.distance && (i_dot.y - j_dot.y) < dots.distance && (i_dot.x - j_dot.x) > - dots.distance && (i_dot.y - j_dot.y) > - dots.distance){
+                        if((i_dot.x - mousePosition.x) < dots.d_radius && (i_dot.y - mousePosition.y) < dots.d_radius && (i_dot.x - mousePosition.x) > - dots.d_radius && (i_dot.y - mousePosition.y) > - dots.d_radius){
+                            ctx.beginPath();
+                            ctx.strokeStyle = averageColorStyles(i_dot, j_dot);
+                            ctx.moveTo(i_dot.x, i_dot.y);
+                            ctx.lineTo(j_dot.x, j_dot.y);
+                            ctx.stroke();
+                            ctx.closePath();
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawDots() {
+            for(i = 0; i < dots.nb; i++){
+                var dot = dots.array[i];
+                dot.draw();
+            }
+        }
+
+        function animateDots() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            moveDots();
+            connectDots();
+            drawDots();
+
+            requestAnimationFrame(animateDots);
+        }
+
+        $('canvas').on('mousemove', function(e){
+            mousePosition.x = e.pageX;
+            mousePosition.y = e.pageY;
+        });
+
+        $('canvas').on('mouseleave', function(e){
+            mousePosition.x = canvas.width / 2;
+            mousePosition.y = canvas.height / 2;
+        });
+
+        createDots();
+        requestAnimationFrame(animateDots);
+    });
+</script>
+<script>
+    var baseURL = API.baseURL = $.cookie("baseURL");
+    var { createApp }=Vue;
+    var app
+    var container = createApp({
+        data() {
+            return {
+                "show": 0,
+                "SuccessText": false,
+                "ErrorText": false,
+                "code": 0,
+                "message": "",
+
+                "listFN": false,
+                "products": [],
+                "listings": [],
+            }
+        },
+        methods: {
+            addlisting() {},
+            login() {},
+            register() {},
+            about() {},
+
+            img(image) {
+                return "img/"+image;
+            },
+        },
+        mounted() {
+            app=this;
+            var product={};
+            product.image="Test.png";
+            product.name="AAA";
+            product.price=123;
+            product.score=3;
+            product.pid=1;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+            product.pid=2;
+            this.products.push(product);
+
+        },
+        components: {
+            "ProductList": {
+                props: ["products"],
+                template:
+                    "<div v-for='item in products' :key='item.pid' class='box' >" +
+                    "    <div class='product--img'>" +
+                    "        <img style='width: 16.5rem;height: 10rem;padding: 1rem;' :src='img(item.image)' alt='没有找到图片'/>" +
+                    "    </div>" +
+                    "    <span style='margin: 0 0 0 2rem'>名称:{{ item.name }}</span><br/>" +
+                    "    <span style='margin: 0 0 0 2rem'>价格:{{ item.price }}</span><br/>" +
+                    // "    <span style='margin: 0 2rem'>得分:</span>" +
+                    "    <var-rate v-model='item.score' readonly half style='margin: 0 3.5rem'/>" +
+                    "    <var-button text style='margin: 0 2rem;float: left' @click='getProductDetail(item.pid)'><var-icon name='view' /></var-button>" +
+                    "    <var-button text style='margin: 0 2rem;float: right' @click='addProduct(item.pid)'><var-icon name='plus' /></var-button>" +
+                    "</div>",
+                data() {
+                    return {
+                    }
+                },
+                methods: {
+                    img(image) {
+                        return "img/"+image;
+                    },
+                    getProductDetail(pid) {
+                        app.getProductDetail(pid);
+                    },
+                    //此处bug
+                    addProduct(pid) {
+                        var listing={};
+                        var product=API.getProduct(pid,app.ShopUID,null,null).product;
+                        listing.uid=app.uid;
+                        listing.pid=product.pid;
+                        listing.name=product.name;
+                        listing.amount=1;
+                        var result=app.listings.some(item=>{ if(item.pid===product.pid) return true; })
+                        if(!result)
+                            app.listings.push(listing);
+                    },
+                },
+            },
+            "BuyList": {
+                props:["listings"],
+                template:
+                    "  <var-tabs" +
+                    "    style='width:  45rem;height: 44.7rem;--tab-font-size: 2rem'" +
+                    "    layout-direction='vertical'" +
+                    "    active-color='#fff'" +
+                    "    inactive-color='#0008'" +
+                    "    v-model:active='buynum'>" +
+                    "    <var-tab v-for='item in listings'>" +
+                    "        <div style='height: 5rem;text-align: center;padding: 1.5rem 0'>aaa{{ item.name }}" +
+                    "            <var-button text :disabled='item.amount==10' @click='item.amount++'><var-icon name='plus' /></var-button>" +
+                    "            {{ item.amount }}" +
+                    "            <var-button text :disabled='item.amount==1' @click='item.amount--'><var-icon name='minus' /></var-button>" +
+                    "            <var-button text @click='deletelist(item.pid)'><var-icon name='delete' /></var-button>" +
+                    "        </div>" +
+                    "    </var-tab>" +
+                    "</var-tabs>",
+                data() {
+                    return{
+                        buynum: 0,
+                    }
+                },
+                methods: {
+                    deletelist(pid) {
+                        app.listings.filter(item=>(item.pid==pid));
+                    },
+                },
+            },
+
+            "success": {
+                template:
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='success' title='成功' description='提交成功'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='success' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.SuccessText=!app.SuccessText;
+                    }
+                }
+            },
+            "error": {
+                props: ["code","message"],
+                template:
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='error' title='错误' description='提交失败'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center;margin: 0 0 2rem 0'>" +
+                    "                  <h3>错误代码:{{ code }}&emsp;&emsp;&emsp;错误信息:{{ message }}</h3><br/>" +
+                    "              </div>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='danger' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.ErrorText=!app.ErrorText;
+                    }
+                }
+            },
+        },
+    })
+    container.use(Varlet).mount("#guest")
+</script>
+</body>
+</html>

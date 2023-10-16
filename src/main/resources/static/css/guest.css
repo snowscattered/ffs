@@ -2,9 +2,10 @@ html, body
 {
     background: #fff; margin: 0; padding:0;
 }
+html::-webkit-scrollbar { display: none; }
 canvas
 {
-    width: 100%; height: 100%; position: absolute;
+    width: 100%; height: 100%; position: fixed;
 }
 .codrops-demos
 {
@@ -35,7 +36,6 @@ canvas
     border-color: #383a3c;
 }
 
-
 .container
 {
     display: block;
@@ -44,40 +44,18 @@ canvas
     background: white;
     background-size: 100% 100%;
 }
-.img-info
+.swipe-example
 {
-    width: 12rem;
-    height: 12rem;
-    margin:2rem 0 0 0;
-    background: white;
-    border-radius: 50%;
+    width: 90rem;
+    height: 25rem;
+    margin: 0 auto;
 }
-.input--block
+.swipe-example-image
 {
-    background: #0004;
-    width: 40rem;
-    margin: 2rem auto;
-}
-.button--block
-{
-    width: 12rem;
-    margin: 0 2rem;
-}
-.Main
-{
-    width: 64.6rem;
-    height: 48.7rem;
-    background: #fff4;
-}
-.title
-{
-    width: 64rem;
-    text-align: center;
-    margin: 2rem 0;
-}
-.sign
-{
-    margin: 0 0 0 8rem;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
 }
 .box
 {
@@ -91,33 +69,4 @@ canvas
     box-shadow: 0.3rem 0.3rem 0.5rem 0 rgb(0,0,0,0.4);
     transition: 0.6s;
     transform: translate(0,-2rem);
-}
-.product--img
-{
-    width: 14.5rem;
-    height: 12rem;
-    margin: 1rem 2rem 0;
-    padding: 0;
-}
-.Padding
-{
-    width: 9.8rem;
-    height: 48.7rem;
-    background: #0000;
-}
-.product--main
-{
-    width: 90rem;
-    height: 48.7rem;
-}
-.product--bar
-{
-    height: 4rem;
-    padding: 1rem 0;
-    background: #0004
-}
-.product--bar--main
-{
-    width: 2rem;
-    height: 2rem;
 }
