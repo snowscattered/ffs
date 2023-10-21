@@ -53,3 +53,7 @@
     /*transition: all;*/
     /*transform: rotateX(15deg) rotateY(30deg);*/
 }
+.text
+{
+    padding: 1rem 3rem;
+}

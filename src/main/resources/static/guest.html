@@ -29,15 +29,12 @@
                       style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
                        --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="login"><var-icon name="card-account-details" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="register"><var-icon name="plus"/></var-tab>
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="about"><var-icon name="help-circle"/></var-tab>
             </var-tabs>
             <var-tabs class="Bar-Right"
                       style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
                       --tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem">
-                <var-tab disabled style="--tab-font-size:2rem;--tab-padding:2rem" name="0"><var-icon name="home" /></var-tab>
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="listFN=!listFN"><var-icon name="cart" /></var-tab>
-                <var-tab disabled style="--tab-font-size:2rem;--tab-padding:2rem" name="2"><var-icon name="notebook" /></var-tab>
             </var-tabs>
         </div>
     </var-sticky>
@@ -251,8 +248,23 @@
                 this.product=API.getProduct(pid,null,null,null).product;
             },
             addProduct(pid) {},
-            login() {},
-            register() {},
+            login() {
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "to_logout",
+                    // 阻塞线程避免登出数据与
+                    // 访问根的请求到达次序不同
+                    async: false
+                });
+                var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+                if (keys) {
+                    for (var i = keys.length; i--;)
+                        document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString() + ";path=/;";
+                }
+                sessionStorage.clear();
+                window.location.href = baseURL;
+            },
+
             about() {},
 
             img(image) {

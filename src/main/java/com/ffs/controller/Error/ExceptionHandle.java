@@ -9,12 +9,12 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionHandle {
-//    @ExceptionHandler(Exception.class)
-//    @ResponseBody
-//    public Object exceptionHandle(Exception e) {
-//        Map<String ,Object> objs = new LinkedHashMap<>();
-//        objs.put("code", 50005);
-//        objs.put("message", "未知错误");
-//        return objs;
-//    }
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public Object exceptionHandle(Exception e) {
+        Map<String ,Object> objs = new LinkedHashMap<>();
+        objs.put("code", 50005);
+        objs.put("message", "未知错误");
+        return objs;
+    }
 }

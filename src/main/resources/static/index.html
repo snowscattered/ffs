@@ -84,6 +84,7 @@
                     success: function (data) {
                         if (data.code === 0) {
                             window.location.href = $.cookie("baseURL") + data.url;
+                            // window.location.href = $.cookie("baseURL") + "TEM.html";
                         } else {
                             $.alert({
                                 title: "提示",

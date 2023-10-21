@@ -189,12 +189,13 @@
                 </table>
             </div>
         </div>
-        <var-popup position="center" style="height: 40rem;" v-model:show="orderFN">
+        <var-popup position="center" style="height: 45rem;" v-model:show="orderFN">
             <div >
                 <div style="margin: 1rem 3rem 0">
                     <h3>买家编号:{{ order.bid }}</h3><br/>
                     <h3>商家编号:{{ order.sid }}</h3><br/>
                     <h3>骑手编号:{{ order.did }}</h3><br/>
+                    <h3>订单状态:{{ order.state }}</h3><br/>
                     <h3>备注:{{ order.info }}</h3></var-button><br/>
                     <h3>订单列表:</h3><br/>
                 </div>

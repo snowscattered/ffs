@@ -37,20 +37,27 @@
             <div style="float: left;padding: 1.5rem 0 1.5rem 0.5rem">
                 <var-button text class="BST" @click="List=true"><var-icon name="menu"/></var-button>
             </div>
-            <div class="title"><h3 style="letter-spacing:0.8rem">用户管理</h3></div>
-            <div style="width: 73rem;height: 3rem;padding: 0.5rem">
-                <var-button text class="left" style="height: 3rem"><var-icon name="plus"/></var-button>
-                <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;
-                           --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
-                           --field-decorator-text-color:#fff"
-                           variant="outlined" size="small" placeholder="名称" v-model="UsersName"></var-input>
-                <role-select style="margin: 0 1rem"></role-select>
-                <var-button text class="left" style="height: 3rem"><var-icon name="magnify"/></var-button>
-                <var-button text class="right" style="height: 3rem"><var-icon name="delete" /></var-button>
-            </div>
-            <div class="tableBody">
-                <user-table-head style="width: 73rem;background: #fff8"></user-table-head>
-                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>
+            <div class="title"><h3 style="letter-spacing:0.8rem">系统状态</h3></div>
+<!--            <div style="width: 73rem;height: 3rem;padding: 0.5rem">-->
+<!--                <var-button text class="left" style="height: 3rem"><var-icon name="plus"/></var-button>-->
+<!--                <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;-->
+<!--                           &#45;&#45;input-input-height: 2rem;&#45;&#45;field-decorator-blur-color:#fff8;&#45;&#45;field-decorator-line-size: 0.15rem;-->
+<!--                           &#45;&#45;field-decorator-text-color:#fff"-->
+<!--                           variant="outlined" size="small" placeholder="名称" v-model="UsersName"></var-input>-->
+<!--                <role-select style="margin: 0 1rem"></role-select>-->
+<!--                <var-button text class="left" style="height: 3rem"><var-icon name="magnify"/></var-button>-->
+<!--                <var-button text class="right" style="height: 3rem"><var-icon name="delete" /></var-button>-->
+<!--            </div>-->
+            <div style="width: 73rem;height: 38.5rem;padding: 0.8rem;">
+<!--                <user-table-head style="width: 73rem;background: #fff8"></user-table-head>-->
+<!--                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>-->
+                <div style="width: 73rem;height: 38.5rem;background: #fff8">
+                    <div class="text"><h3>欢迎你:{{ name }}管理员</h3></div>
+                    <div class="text"><h3>现在是:{{ time }}</h3></div>
+                    <div class="text"><h3>当前活跃的用户人数为(暂未开放):0</h3></div>
+                    <div class="text"><h3>系统状态:</h3></div>
+                    <div style="text-align: center"><h1>该功能暂未开放</h1></div>
+                </div>
             </div>
         </div>
         <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
@@ -240,7 +247,7 @@
                                 <td style='text-align: center;width: 4.8rem'><var-checkbox :checked-value='item.rid' @click="Sort(item.rid,SelectRIDs)"></var-checkbox></td>
                                 <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.oid }}</td>
                                 <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.uid }}</td>
-                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.detail }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-ellipsis style="max-width: 9.7rem">{{ item.detail }}</var-ellipsis></td>
                                 <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='getReviewDetail(item.rid)'><var-icon name='view' /></var-button></td>
                                 <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='updateReview(item.rid)'><var-icon name='cog' /></var-button></td>
                                 <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='deleteReview(item.rid)'><var-icon name='delete' /></var-button></td>
@@ -280,6 +287,8 @@
                 "show": 0,
                 "TODO": 0,
                 "pagedata": "system",
+                "name": $.cookie("name"),
+                "time": Utils.getTime("yyyy-MM-dd hh:mm:ss"),
                 "List": false,
                 "SuccessText": false,
                 "ErrorText": false,
@@ -904,6 +913,14 @@
         },
         mounted() {
             app=this;
+            this.timer=setInterval(()=>{
+                app.time=Utils.getTime("yyyy-MM-dd hh:mm:ss");
+            },1000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer);
+            }
         },
         components: {
             "RoleSelect": {
