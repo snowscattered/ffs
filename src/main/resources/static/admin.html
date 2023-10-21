@@ -14,11 +14,11 @@
                     inactive-color="rgb(255, 255, 255, 0.7)"
                     layout-direction="vertical"
                     v-model:active="show">
-                <var-tab name="0" style="--tab-font-size:2rem" >系统状态</var-tab>
-                <var-tab name="1" style="--tab-font-size:2rem" >用户管理</var-tab>
-                <var-tab name="2" style="--tab-font-size:2rem" >商品管理</var-tab>
-                <var-tab name="3" style="--tab-font-size:2rem" >订单管理</var-tab>
-                <var-tab name="4" style="--tab-font-size:2rem" >评论管理</var-tab>
+                <var-tab name="0" style="--tab-font-size:2rem" @click="Activity(0)">系统状态</var-tab>
+                <var-tab name="1" style="--tab-font-size:2rem" @click="Activity(1)">用户管理</var-tab>
+                <var-tab name="2" style="--tab-font-size:2rem" @click="Activity(2)">商品管理</var-tab>
+                <var-tab name="3" style="--tab-font-size:2rem" @click="Activity(3)">订单管理</var-tab>
+                <var-tab name="4" style="--tab-font-size:2rem" @click="Activity(4)">评论管理</var-tab>
                 <var-tab name="5" style="--tab-font-size:2rem" @click="logout">登出</var-tab>
                 <var-tab name="6" style="--tab-font-size:2rem" @click="about">关于</var-tab>
                 <var-tab :disabled="true"></var-tab>
@@ -39,14 +39,14 @@
             </div>
             <div class="title"><h3 style="letter-spacing:0.8rem">用户管理</h3></div>
             <div style="width: 73rem;height: 3rem;padding: 0.5rem">
-                <var-button text class="left" style="height: 3rem" @click="addUser"><var-icon name="plus"/></var-button>
+                <var-button text class="left" style="height: 3rem"><var-icon name="plus"/></var-button>
                 <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;
                            --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
                            --field-decorator-text-color:#fff"
-                           variant="outlined" size="small" placeholder="姓名" v-model="UsersName"></var-input>
+                           variant="outlined" size="small" placeholder="名称" v-model="UsersName"></var-input>
                 <role-select style="margin: 0 1rem"></role-select>
-                <var-button text class="left" style="height: 3rem" @click="selectUser"><var-icon name="magnify"/></var-button>
-                <var-button text class="right" style="height: 3rem" @click="deleteOrders"><var-icon name="delete" /></var-button>
+                <var-button text class="left" style="height: 3rem"><var-icon name="magnify"/></var-button>
+                <var-button text class="right" style="height: 3rem"><var-icon name="delete" /></var-button>
             </div>
             <div class="tableBody">
                 <user-table-head style="width: 73rem;background: #fff8"></user-table-head>
@@ -69,17 +69,45 @@
                 <var-input style="float: left;width: 21.5rem;margin: 0 0 0 1rem;
                            --input-input-height: 2rem;--field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;
                            --field-decorator-text-color:#fff"
-                           variant="outlined" size="small" placeholder="姓名" v-model="UsersName"></var-input>
-                <role-select style="margin: 0 1rem"></role-select>
+                           variant="outlined" size="small" placeholder="名称" v-model="UsersName"></var-input>
+                <role-select style="margin: 0 1rem" :role="Role"></role-select>
                 <var-button text class="left" style="height: 3rem" @click="selectUser"><var-icon name="magnify"/></var-button>
                 <var-button text class="right" style="height: 3rem" @click="deleteUsers"><var-icon name="delete" /></var-button>
             </div>
             <div class="tableBody">
                 <user-table-head style="width: 73rem;background: #fff8"></user-table-head>
-                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>
+<!--                <user-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :users="users"></user-table-body>-->
+                <div class="scroll" style="width: 73rem;height: 31rem;background: #fff8" @scroll="UsersHandleScroll">
+                <table :style='`transform:translateY(${UsersOffsetY}px)`'>
+                    <var-checkbox-group ref='users' v-model='SelectUIDs'>
+                        <tbody style='height: 4rem' v-for='item in VirUsers' :key='item.uid'>
+                        <tr>
+                            <td style='text-align: center;width: 4.8rem'><var-checkbox :checked-value='item.uid' @click="Sort(item.uid,SelectUIDs)"></var-checkbox></td>
+                            <td style='text-align: center;width: 9.8rem;word-break: break-all'>{{ item.uid }}</td>
+                            <td style='text-align: center;width: 9.8rem;word-break: break-all'>{{ item.username }}</td>
+                            <td style='text-align: center;width: 9.8rem;word-break: break-all'>{{ item.role }}</td>
+                            <td style='text-align: center;width: 9.8rem;word-break: break-all'>{{ item.name }}</td>
+                            <td style='text-align: center;width: 9.5rem;word-break: break-all'><var-button text @click='getUserDetail(item.uid)'><var-icon name='view' /></var-button></td>
+                            <td style='text-align: center;width: 9.5rem;word-break: break-all'><var-button text @click='updateUser(item.uid)'><var-icon name='cog' /></var-button></td>
+                            <td style='text-align: center;width: 10rem;word-break: break-all'><var-button text @click='deleteUser(item.uid)'><var-icon name='delete' /></var-button></td>
+                        </tr>
+                        </tbody>
+                    </var-checkbox-group>
+                </table>
+                </div>
             </div>
         </div>
         <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+        <var-popup style="width: 40rem;padding: 2rem" position="center" v-model:show="UserDetail">
+            <div style="width: 100%;text-align: center"><h1>用户详细信息</h1></div>
+            <div><h3>UID: {{ user.uid }}</h3></div>
+            <div><h3>账号: {{ user.username }}</h3></div>
+            <div><h3>身份: {{ user.role }}</h3></div>
+            <div><h3>名称: {{ user.name }}</h3></div>
+            <div><h3>电话: {{ user.tel }}</h3></div>
+            <div><h3>地址: {{ user.address }}</h3></div>
+            <div><h3>备注: {{ user.info }}</h3></div>
+        </var-popup>
     </div>
 
 
@@ -101,10 +129,37 @@
             </div>
             <div class="tableBody">
                 <product-table-head style="width: 73rem;background: #fff8"></product-table-head>
-                <product-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :products="products"></product-table-body>
+<!--                <product-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :products="products"></product-table-body>-->
+                <div class="scroll" style="width: 73rem;height: 31rem;background: #fff8" @scroll="ProductsHandleScroll">
+                    <table :style='`transform:translateY(${ProductsOffsetY}px)`'>
+                        <var-checkbox-group ref='products' v-model='SelectPIDs'>
+                            <tbody style="height: 4rem;" v-for='item in VirProducts' :key='item.pid'>
+                            <tr>
+                                <td style='text-align: center;width: 4.8rem'><var-checkbox :checked-value='item.pid' @click="Sort(item.pid,SelectPIDs)"></var-checkbox></td>
+                                <td style='text-align: center;width: 13.5rem;word-break: break-all'>{{ item.pid }}</td>
+                                <td style='text-align: center;width: 13.5rem;word-break: break-all'>{{ item.uid }}</td>
+                                <td style='text-align: center;width: 13.5rem;word-break: break-all'>{{ item.name }}</td>
+                                <td style='text-align: center;width: 9.2rem;word-break: break-all'><var-button text @click='getProductDetail(item.pid)'><var-icon name='view' /></var-button></td>
+                                <td style='text-align: center;width: 9.2rem;word-break: break-all'><var-button text @click='updateProduct(item.pid)'><var-icon name='cog' /></var-button></td>
+                                <td style='text-align: center;width: 9.2rem;word-break: break-all'><var-button text @click='deleteProduct(item.pid)'><var-icon name='delete' /></var-button></td>
+                            </tr>
+                            </tbody>
+                        </var-checkbox-group>
+                    </table>
+                </div>
             </div>
         </div>
         <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+        <var-popup style="width: 40rem;padding: 2rem" position="center" v-model:show="ProductDetail">
+            <div style="width: 100%;text-align: center"><h1>商品详细信息</h1></div>
+            <div><h3>PID: {{ product.pid }}</h3></div>
+            <div><h3>商品名: {{ product.name }}</h3></div>
+            <div><h3>价格: {{ product.price }}</h3></div>
+            <div><h3>评分: {{ product.score }}</h3></div>
+            <div><h3>备注: {{ product.info }}</h3></div>
+            <div><h3>图片:</h3></div>
+            <div><img style="width: 35rem;height: 20rem;" :src="img(product.image) "></div>
+        </var-popup>
     </div>
 
 
@@ -123,10 +178,41 @@
             </div>
             <div class="tableBody">
                 <order-table-head style="width: 73rem;background: #fff8"></order-table-head>
-                <order-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :orders="orders"></order-table-body>
+<!--                <order-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :orders="orders"></order-table-body>-->
+                <div class="scroll" style="width: 73rem;height: 31rem;background: #fff8" @scroll="OrdersHandleScroll">
+                    <table :style='`transform:translateY(${OrdersOffsetY}px)`'>
+                        <var-checkbox-group ref='products' v-model='SelectOIDs'>
+                            <tbody style="height: 4rem;" v-for='item in VirOrders' :key='item.oid'>
+                            <tr>
+                                <td style='text-align: center;width: 4.8rem'><var-checkbox :checked-value='item.oid'></var-checkbox></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.oid }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.tid }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.state }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.date }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='updateOrder(item.oid)'><var-icon name='cog' /></var-button></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='deleteOrder(item.oid)'><var-icon name='delete' /></var-button></td>
+                            </tr>
+                            </tbody>
+                        </var-checkbox-group>
+                    </table>
+                </div>
             </div>
         </div>
         <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
+        <var-popup position="center" style="height: 40rem;" v-model:show="OrderDetail">
+            <div >
+                <div style="margin: 1rem 3rem 0">
+                    <h3>买家编号:{{ order.uid }}</h3><br/>
+                    <h3>商家编号:{{ order.sid }}</h3><br/>
+                    <h3>骑手编号:{{ order.did }}</h3><br/>
+                    <h3>备注:{{ order.info }}</h3><var-button text style="float: right;height: 4rem"><var-icon name='delete' /></var-button></var-button><br/>
+                    <h3>订单列表:</h3><br/>
+                </div>
+                <listing-table-head style="width: 40rem;margin: 0 3rem;background: #0004"></listing-table-head>
+                <listing-table-body class="scroll" style="width: 40rem;height: 20rem;margin: 0 3rem;background: #0004" :listings="listings"></listing-table-body>
+            </div>
+        </var-popup>
     </div>
 
 
@@ -145,12 +231,30 @@
             </div>
             <div class="tableBody">
                 <review-table-head style="width: 73rem;background: #fff8"></review-table-head>
-                <review-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :reviews="review"></review-table-body>
+<!--                <review-table-body class="scroll" style="width: 73rem;height: 31rem;background: #fff8" :reviews="review"></review-table-body>-->
+                <div class="scroll" style="width: 73rem;height: 31rem;background: #fff8" @scroll="ReviewsHandleScroll">
+                    <table :style='`transform:translateY(${ReviewsOffsetY}px)`'>
+                        <var-checkbox-group ref='products' v-model='SelectRIDs'>
+                            <tbody style="height: 4rem;" v-for='item in VirReviews' :key='item.oid'>
+                            <tr>
+                                <td style='text-align: center;width: 4.8rem'><var-checkbox :checked-value='item.rid' @click="Sort(item.rid,SelectRIDs)"></var-checkbox></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.oid }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.uid }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'>{{ item.detail }}</td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='getReviewDetail(item.rid)'><var-icon name='view' /></var-button></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='updateReview(item.rid)'><var-icon name='cog' /></var-button></td>
+                                <td style='text-align: center;width: 9.7rem;word-break: break-all'><var-button text @click='deleteReview(item.rid)'><var-icon name='delete' /></var-button></td>
+                            </tr>
+                            </tbody>
+                        </var-checkbox-group>
+                    </table>
+                </div>
             </div>
         </div>
         <div style="width: 17.5rem;height: 48.7rem;float: left;margin: 5rem 0 0 0;background: #0000"></div>
     </div>
 </div>
+
 <link rel="stylesheet" type="text/css" href="css/admin.css">
 <link rel="stylesheet" type="text/css" href="css/general.css">
 
@@ -174,63 +278,569 @@
         data() {
             return {
                 "show": 0,
+                "TODO": 0,
+                "pagedata": "system",
                 "List": false,
-                "users": API.getUser(null,null,null,null).users,
-                "UsersName": "",
-                "Role": "",
-                "SelectUIDs": [],
-
-                "products": API.getProduct(null,null,null,null).products,
-                "ProductName": "",
-                "SelectPIDs": [],
-
-                "orders":API.getOrder(null,null).orders,
-                "OrderState": "",
-                "SelectOIDs": [],
-
-                "reviews": API.getReview(null,null).reviews,
-                "SelectRIDs": [],
-
                 "SuccessText": false,
                 "ErrorText": false,
                 "code": 100,
-                "message": "aaa"
+                "message": "",
+                "ScrollTime": new Date().getTime(),
+
+                "user": "",
+                "users": [],
+                "UserDetail": false,
+                "UsersName": "",
+                "Role": "",
+                "SelectUIDs": [],
+                "VirUsers": [],
+                "UsersScrollH":0,
+                "UsersShowNum":0,
+                "UsersOffsetY":0,
+
+                "product": "",
+                "products": API.getProduct(null,null,null,null).products,
+                "ProductDetail": false,
+                "ProductName": "",
+                "SelectPIDs": [],
+                "VirProducts": [],
+                "ProductsScrollH":0,
+                "ProductsShowNum":0,
+                "ProductsOffsetY":0,
+
+                "order": "",
+                "orders":API.getOrder(null,null).orders,
+                "OrderDetail": false,
+                "OrderState": "",
+                "SelectOIDs": [],
+                "VirOrders": [],
+                "OrdersScrollH":0,
+                "OrdersShowNum":0,
+                "OrdersOffsetY":0,
+                "listings": [],
+
+                "reviews": [],
+                "SelectRIDs": [],
+                "VirReviews": [],
+                "ReviewsScrollH":0,
+                "ReviewsShowNum":0,
+                "ReviewsOffsetY":0,
             }
         },
         methods: {
-            test() {
-                this.ErrorText=true;
+            // Test() {
+            //     alert(this.SelectUIDs);
+            // },
+            Activity(TODO) {
+                if(TODO === 0) {
+
+                } else if (TODO === 1) {
+                    API.getUser(null, null, null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "users";
+                            this.SelectUIDs=[];
+                            this.users = result.users;
+                        }
+                    })
+                } else if (TODO === 2) {
+                    API.getProduct(null,null,null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "products";
+                            this.SelectPIDs=[];
+                            this.products = result.products;
+                        }
+                    })
+                } else if (TODO === 3) {
+                    API.getOrder(null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "orders";
+                            this.SelectOIDs=[];
+                            this.orders = result.orders;
+                            this.listings = result.listings;
+                        }
+                    })
+                } else if (TODO === 4) {
+                    API.getReview(null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "reviews";
+                            this.SelectRIDs=[];
+                            this.reviews = result.reviews;
+                        }
+                    })
+                }
+            },
+            Refresh() {
+                if (this.pagedata === "users") {
+                    API.getUser(null,this.UsersName,this.Role,(result) => {
+                        if(result.code === 0) {
+                            this.users=result.users;
+                        }
+                    })
+                } else if (this.pagedata === "products") {
+                    API.getProduct(null,null,this.ProductName,(result) => {
+                        if(result.code === 0) {
+                            this.products=result.products;
+                        }
+                    })
+                } else if (this.pagedata === "orders") {
+                    API.getOrder(null,(result) => {
+                        if(result.code === 0) {
+                            this.orders=result.orders;
+                        }
+                    })
+                } else if (this.pagedata === "reviews") {
+                    API.getReview(null,(result) => {
+                        if(result.code === 0) {
+                            this.reviews=result.reviews;
+                        }
+                    })
+                }
+            },
+            Sort(value,list) {
+                var index=list.indexOf(value);
+                if(index === -1)
+                    list.push(value);
+                else
+                    list.splice(index,1);
+                list=list.sort((a,b) => a-b);
             },
 
-            addUser() {},
-            selectUser() {},
-            getUserDetail(uid) {},
-            updateUser(uid) {},
+            addUser() {
+                $.confirm({
+                    title: "添加用户",
+                    content:
+                        "<div>" +
+                        "<div><h3 id='1' style='display: inline'>账号: </h3><input id='addUsername' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>密码: </h3><input id='addPassword' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>名称: </h3><input id='addName' style='width: 40%;display: inline'></div>" +
+                        "<div><h3 style='display: inline'>身份: </h3>" +
+                        "<select id='addRole'>" +
+                        "    <option value='buyer'>用户</option>" +
+                        "    <option value='shop'>商家</option>" +
+                        "    <option value='delivery'>骑手</option>" +
+                        "</select>" +
+                        "</div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var user = {};
+                                var result;
+                                user.username = this.$content.find("#addUsername").val();
+                                user.password = this.$content.find("#addPassword").val();
+                                user.name = this.$content.find("#addName").val();
+                                user.role = this.$content.find("#addRole").val();
+                                user.img = "Test.png"
+                                result = API.addUser(user);
+                                if (result.code === 0) {
+                                    app.SuccessText = true;
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+            selectUser() {
+                $.confirm({
+                    title: "查找",
+                    content:
+                        "<div style='display: flex;align-items: center'><h3 style='display: inline'>根据:UID(将忽略姓名和身份查询)</h3>" +
+                        "<h3 style='display: inline'>查询:</h3><input id='UID' style='width: 30%;display: inline'>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "执行",
+                            action: function () {
+                                var UID = this.$content.find("#UID").val();
+                                if(UID === "") {
+                                    app.users = API.getUser(null, null, null, null).users;
+                                } else {
+                                    var result = API.getUser(UID, null, null, null);
+                                    if(result.code===0)
+                                        app.users = result.user == null ? [] : [result.user];
+                                    else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+            getUserDetail(uid) {
+                var result = API.getUser(uid, null, null, null);
+                if (result.code === 0) {
+                    app.user=result.user;
+                    app.UserDetail=true;
+                    // var user = result.user;
+                    // $.dialog({
+                    //     title: "用户详细信息",
+                    //     content:
+                    //         "<div>" +
+                    //         "<div><h3>电话: " + user.tel + "</h3></div>" +
+                    //         "<div><h3>地址: " + user.address + "</h3></div>" +
+                    //         "<div><h3>备注: " + user.info + "</h3></div>" +
+                    //         "</div>",
+                    //     boxWidth: "45%",
+                    //     useBootstrap: false,
+                    //     theme: "material",
+                    //     animationBounce: 1.5
+                    // })
+                } else {
+                    app.code = result.code;
+                    app.message = result.message;
+                    app.ErrorText = true;
+                }
+            },
+            updateUser(uid) {
+                var result = API.getUser(uid,null,null,null);
+                var user;
+                if (result.code === 0) {
+                    user = result.user;
+                    $.confirm({
+                        title: "修改用户",
+                        content:
+                            // "<img :src='img(user.image)'>" +
+                            "<div>" +
+                            "<div><h3 id='1' style='display: inline'>编号: </h3>" +
+                            "    <input value='" + user.uid + "' id='updateUid' style='width: 40%;display: inline' readonly>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>身份: </h3>" +
+                            "<select id='updateRole'>" +
+                            "    <option " + (user.role === "buyer" ? "selected" : "") + " value='buyer'>用户</option>" +
+                            "    <option " + (user.role === "shop" ? "selected" : "") + " value='shop'>商家</option>" +
+                            "    <option " + (user.role === "delivery" ? "selected" : "") + " value='delivery'>骑手</option>" +
+                            "</select>" +
+                            "</div>" +
+                            "<div><h3 id='1' style='display: inline'>账号: </h3>" +
+                            "    <input value='" + user.username + "' id='updateUsername' style='width: 40%;display: inline' readonly>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>密码: </h3>" +
+                            "    <input id='updatePassword' style='width: 40%;display: inline'>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>姓名: </h3>" +
+                            "    <input value='" + user.name + "' id='updateName' style='width: 40%;display: inline'>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>电话: </h3>" +
+                            "    <input value='" + user.tel + "' id='updateTel' style='width: 40%;display: inline'>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>地址: </h3>" +
+                            "    <input value='" + user.address + "' id='updateAddress' style='width: 40%;display: inline'>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>备注: </h3>" +
+                            "    <input value='" + user.info + "' id='updateInfo' style='width: 40%;display: inline'>" +
+                            "</div>" +
+                            "<div><h3 style='display: inline'>头像: </h3>" +
+                            "   <input type='file' id='updateImage' accept='image/*'>" +
+                            "</div>" +
+                            "</div>",
+                        buttons: {
+                            confirm: {
+                                text: "确认",
+                                action: function() {
+                                    if(this.$content.find("#updateImage").val() !== "") {
+                                        alert(this.$content.find("#updateImage").val());
+                                        user.image=API.Upload(document.getElementById("updateImage")).fileName;
+                                    }
+                                    user.role = this.$content.find("#updateRole").val();
+                                    user.password = this.$content.find("#updatePassword").val();
+                                    user.name = this.$content.find("#updateName").val();
+                                    user.tel = this.$content.find("#updateTel").val();
+                                    user.address = this.$content.find("#updateAddress").val();
+                                    user.info = this.$content.find("#updateInfo").val();
+                                    var result = API.updateUser(user);
+                                    if (result.code === 0) {
+                                        app.SuccessText = true;
+                                        app.Refresh();
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                }
+                            },
+                            cancel: {
+                                text: "取消"
+                            }
+                        },
+                        boxWidth: "30%",
+                        useBootstrap: false,
+                        theme: "material",
+                        animationBounce: 1.5,
+                    })
+                } else {
+                    app.code = result.code;
+                    app.message = result.message;
+                    app.ErrorText = true;
+                }
+            },
             deleteUsers() {},
-            deleteUser(uid) {},
+            deleteUser(uid) {
+                var result = API.getUser(uid,null,null,null);
+                var user = result.user
+                $.alert({
+                    title: "删除用户",
+                    content:
+                        "<div style='width: 100%'>" +
+                        "<div style='width: 100%'>" +
+                        "<h3 style='display: inline'>这将</h3>" +
+                        "<h2 style='color: red;display: inline'>不可逆</h2>" +
+                        "<h3 style='display: inline'>地删除"+ user.name +"(Uid: " + user.uid + ",Role:" + user.role + ")</h3>" +
+                        "</div>" +
+                        "<div><h3>确认要继续执行吗?</h3></div>" +
+                        "</div>",
+                    buttons:{
+                        confirm: {
+                            text: "删除",
+                            btnClass: "btn-red",
+                            action: function() {
+                                result = API.deleteUser(uid);
+                                if (result.code === 0) {
+                                    app.SuccessText = true;
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    },
+                    boxWidth: "25%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5,
+                })
+            },
+            UsersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.UsersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirUsers=this.users.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.UsersShowNum
+                    )
+                    // console.log(scrollTop,this.UsersShowNum,scrollTop/(4*14)+this.UsersShowNum,this.VirUsers)
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
 
             addProduct() {},
             selectProduct() {},
-            getProductDetail(pid) {},
+            getProductDetail(pid) {
+                var result = API.getProduct(pid, null, null, null);
+                if (result.code === 0) {
+                    app.product=result.product;
+                    app.ProductDetail=true;
+                } else {
+                    app.code = result.code;
+                    app.message = result.message;
+                    app.ErrorText = true;
+                }
+            },
             updateProduct(pid) {},
             deleteProducts() {},
             deleteProduct(pid) {},
+            ProductsHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ProductsOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirProducts=this.products.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ProductsShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
 
             selectOrder() {},
-            getOrderDetail(oid) {},
+            getOrderDetail(oid) {
+                var result = API.getOrder(oid, null);
+                if (result.code === 0) {
+                    app.order=result.order;
+                    app.OrderDetail=true;
+                } else {
+                    app.code = result.code;
+                    app.message = result.message;
+                    app.ErrorText = true;
+                }
+            },
             updateOrder(oid) {},
             deleteOrders() {},
             deleteOrder(oid) {},
+            OrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.OrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirOrders=this.orders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.OrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
 
             selectReview() {},
             getReviewDetail(rid) {},
             updateReview(rid) {},
             deleteReviews() {},
             deleteReview(rid) {},
-
-            img(image) {
-                return "img/"+image;
+            ReviewsHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ReviewsOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirReviews=this.reviews.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ReviewsShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
             },
+
+            //待修改
+            updateUserImage(pid) {
+                var product=API.getProduct(pid,null,null,null).product;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src="+ product.image + "'img' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    product.image=result.fileName;
+                                    alert(product.image)
+                                    result = API.updateProduct(product,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+            updateProductImage(pid) {
+                var product=API.getProduct(pid,null,null,null).product;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src="+ product.image + "'img' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    product.image=result.fileName;
+                                    alert(product.image)
+                                    result = API.updateProduct(product,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+
+            input(fileDom) {
+                if (window.FileReader) {
+                    var reader = new FileReader();
+                } else {
+                    alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+                }
+                var file = fileDom.files[0];
+                var imageType = /^image\//;
+                if (!imageType.test(file.type)) {
+                    alert("请选择图片！");
+                    return;
+                }
+                reader.onload = function (e) {
+                    var img = document.getElementById("img");
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+            img(image) { return "img/"+image; },
             logout() {
                 $.ajax({
                     type: "POST",
@@ -250,17 +860,46 @@
             about() {},
         },
         watch: {
-            UsersName(newUsersName,oldUsersName) {
-                this.users=API.getUser(null,newUsersName,this.Role,null).users
+            users(newusers,oldusers) {
+                this.UsersOffsetY=0;
+                this.UsersScrollH=this.users.length*(4*14);
+                this.UsersShowNum=Math.floor(31/4)+4;
+                this.VirUsers=this.users.slice(0,this.UsersShowNum);
+                this.ScrollTime=new Date().getTime();
             },
-            Role(newRole,oldRole) {
-                this.users=API.getUser(null,this.UsersName,newRole,null).users
+            products(newproduct,oldproduct) {
+                this.ProductsOffsetY=0;
+                this.ProductsScrollH=this.products.length*(4*14);
+                this.ProductsShowNum=Math.floor(31/4)+4;
+                this.VirProducts=this.products.slice(0,this.ProductsShowNum);
+                this.ScrollTime=new Date().getTime();
             },
-            ProductName(newProductName,oldProductName) {
-
+            orders(neworder,oldorder) {
+                this.OrdersOffsetY=0;
+                this.OrdersScrollH=this.orders.length*(4*14);
+                this.OrdersShowNum=Math.floor(31/4)+4;
+                this.VirOrders=this.orders.slice(0,this.OrdersShowNum);
+                this.ScrollTime=new Date().getTime();
             },
-            OrderState(newOrderState,oldOrderState) {
-
+            reviews(newreview,oldreview) {
+                this.ReviewsOffsetY=0;
+                this.ReviewsScrollH=this.reviews.length*(4*14);
+                this.ReviewsShowNum=Math.floor(31/4)+4;
+                this.VirReviews=this.reviews.slice(0,this.ReviewsShowNum);
+                this.ScrollTime=new Date().getTime();
+            },
+            
+            UsersName(newUsersName, oldUsersName) {
+                this.users = API.getUser(null, newUsersName, this.Role, null).users;
+            },
+            Role(newRole, oldRole) {
+                this.users = API.getUser(null, this.UsersName, newRole, null).users
+            },
+            ProductName(newProductName, oldProductName) {
+                this.products = API.getProduct(null, null, newProductName, null).products;
+            },
+            OrderState(newOrderState, oldOrderState) {
+                this.orders = API.getOrder(null, null).orders;
             },
         },
         mounted() {
@@ -268,11 +907,12 @@
         },
         components: {
             "RoleSelect": {
+                props: ["role"],
                 template:
                     "      <var-select style='float: left;width: 21.5rem;--select-scroller-background:#0000;" +
                     "                  --field-decorator-outlined-small-padding-top:0.7rem;--field-decorator-outlined-small-padding-bottom:0.7rem;" +
                     "                  --field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;--field-decorator-text-color:#fff'" +
-                    "                  variant='outlined' size='small' placeholder='身份' v-model='role'>" +
+                    "                  variant='outlined' size='small' placeholder='身份' v-model='select'>" +
                     "        <var-option style='--option-height:2rem' @click='res(\"\")'    label='' value='' />" +
                     "        <var-option style='--option-height:2rem' @click='res(\"buyer\")' label='用户' value='buyer' />" +
                     "        <var-option style='--option-height:2rem' @click='res(\"shop\")' label='商家' value='shop'/>" +
@@ -281,7 +921,7 @@
                     "      </var-select>",
                 data() {
                     return{
-                        "role": "",
+                        "select": this.role,
                     }
                 },
                 methods: {
@@ -289,11 +929,6 @@
                         app.Role=data
                     }
                 },
-                // watch: {
-                //     role(newrole,oldrole) {
-                //         app.role=newrole;
-                //     }
-                // }
             },
             "UserTableHead": {
                 template:
@@ -302,9 +937,9 @@
                     "      <tr>" +
                     "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
-                    "        <th style='text-align: center;width: 50rem'>用户名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>账号</th>" +
                     "        <th style='text-align: center;width: 50rem'>身份</th>" +
-                    "        <th style='text-align: center;width: 50rem'>姓名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>名称</th>" +
                     "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
                     "        <th style='text-align: center;width: 50rem'>操作</th>" +
                     "        <th style='text-align: center;width: 50rem'>删除</th>" +
@@ -396,15 +1031,16 @@
                     getProductDetail(pid) { app.getProductDetail(pid) },
                     updateProduct(pid) { app.updateProduct(pid) },
                     deleteProduct(pid) { app.deleteProduct(pid) },
+                    updateProductImage(pid) { app.updateProductImage(pid) },
                 },
             },
-            
+
             "StateSelect": {
                 template:
                     "      <var-select style='float: left;width: 21.5rem;--select-scroller-background:#0000;" +
                     "                  --field-decorator-outlined-small-padding-top:0.7rem;--field-decorator-outlined-small-padding-bottom:0.7rem;" +
                     "                  --field-decorator-blur-color:#fff8;--field-decorator-line-size: 0.15rem;--field-decorator-text-color:#fff'" +
-                    "                  variant='outlined' size='small' placeholder='状态' v-model='OrderState'>" +
+                    "                  variant='outlined' size='small' placeholder='交易状态' v-model='OrderState'>" +
                     "        <var-option style='--option-height:2rem' @click='res(\"\")'    label='' value='' />" +
                     "        <var-option style='--option-height:2rem' @click='res(\"unpiad\")' label='未支付' value='unpaid' />" +
                     "        <var-option style='--option-height:2rem' @click='res(\"piad\")' label='已支付' value='piad'/>" +
@@ -445,7 +1081,7 @@
                 props: ["orders"],
                 template:
                     "<var-table>" +
-                    "<var-checkbox-group ref='products' v-model='SelectPIDs'>"+
+                    "<var-checkbox-group ref='products' v-model='SelectOIDs'>"+
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr>" +
                     "        <td style='text-align: center;width: 3.5rem'><var-checkbox :checked-value='item.oid'></var-checkbox></td>" +
@@ -475,6 +1111,33 @@
                     updateOrder(oid) { app.updateOrder(oid) },
                     deleteOrder(oid) { app.deleteOrder(oid) },
                 },
+            },
+            "ListingTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商品号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>数量</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>",
+            },
+            "ListingTableBody": {
+                props: ["listings"],
+                template:
+                    "<var-table>" +
+                    "    <tbody v-for='item in listings' :key='item.lid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.lid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.pid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.amount }}</td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</var-table>",
             },
 
             "ReviewTableHead": {

@@ -117,14 +117,14 @@ public class ReviewServiceTest {
         if (reviewService.addReview(review) != 0) {
             throw new Exception();
         }
-        review.pid = product.pid;
+        review.uid = product.pid;
         if (reviewService.addReview(review) != 1) {
             throw new Exception();
         }
         review.score = 40;
         review.detail = "test1";
         reviewService.addReview(review);
-        review.pid = product1.pid;
+        review.uid = product1.pid;
         review.score = 30;
         review.detail = "test2";
         reviewService.addReview(review);
@@ -168,7 +168,7 @@ public class ReviewServiceTest {
         if (reviewService.updReview(review1) != 1) {
             throw new Exception();
         }
-        review1 = reviewService.findReviews(review1.pid).get(0);
+        review1 = reviewService.findReviews(review1.uid).get(0);
         if (review1.score != 35) {
             throw new Exception();
         } else if (!"test".equals(review1.detail)) {
@@ -176,7 +176,7 @@ public class ReviewServiceTest {
         }
         review1.detail = "testtest";
         reviewService.updReview(review1);
-        review1 = reviewService.findReviews(review1.pid).get(0);
+        review1 = reviewService.findReviews(review1.uid).get(0);
         if (!"testtest".equals(review1.detail)) {
             throw new Exception();
         }

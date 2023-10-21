@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
@@ -151,6 +152,21 @@ public class GenerationController
         }
         return objs;
     }
+    @PostMapping("/to_guest")
+    @ResponseBody
+    public Object toGuest(HttpServletRequest req,
+                          HttpServletResponse rsp) {
+        Map<String, Object> objs = new LinkedHashMap<>();
+        if (!rateLimiter.tryAcquire()) {
+            objs.put("code", 60001);
+            objs.put("message", "请求过载");
+            return  objs;
+        }
+        objs.put("code", 0);
+        req.getSession().setAttribute("op","guest");
+        objs.put("url", "guest.html");
+        return  objs;
+    }
 
     @RequestMapping("/to_logout")
     @ResponseBody
@@ -197,27 +213,4 @@ public class GenerationController
         objs.put("message","success");
         return objs;
     }
-
-    @RequestMapping("/delete")
-    public Object delete(String path)
-    {
-        Map<String, Object> objs=new LinkedHashMap<>();
-        return objs;
-    }
-
-//    public Object abc(HttpServletResponse req) throws IOException
-//    {
-//        byte[] a = new byte[0];
-//        OutputStream in = req.getOutputStream();
-//        in.write(a, 0, 128);
-//        if (129 <= a.length) {
-//            return new HashMap<>();
-//        }
-//        String filename;
-//
-//        File file = new File(filename);
-//        file.createNewFile();
-//        FileOutputStream out = new FileOutputStream(file);
-//        out.write(a);
-//    }
 }

@@ -250,6 +250,7 @@ public class ProductAPI
         int status = productService.updProduct(product);
         if (status == 1)
         {
+
             objs.put("code", 0);
             objs.put("message", "success");
         } else

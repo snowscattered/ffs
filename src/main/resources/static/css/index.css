@@ -75,3 +75,9 @@ html,body
     height: 40px;
     margin: 10% 10%;
 }
+.button-guest
+{
+    width: 80%;
+    height: 40px;
+    margin: 0 10%;
+}

@@ -5,23 +5,10 @@
     <title>buyer</title>
     <link rel="stylesheet" type="text/css" href="css/buyer.css">
     <link rel="stylesheet" type="text/css" href="css/general.css">
-    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
-    <script src="js/jquery-1.9.1-min.js"></script>
-    <script src="js/jquery.cookie-1.4.1-min.js"></script>
-    <script src="js/jquery-confirm-min.js"></script>
-    <script src="js/vue-3.3.4-global-min.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <!-- 桌面端兼容 -->
-    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+    <!--    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
 </head>
 <body class="broaden">
-<canvas></canvas>
+<!--<canvas></canvas>-->
 <div id="buyer" class="container">
     <var-sticky>
         <div class="Top-Bar">
@@ -29,14 +16,14 @@
                       style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
                        --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="logout"><var-icon name="upload"/></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" ><var-icon name="plus"/></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="about"><var-icon name="help-circle" /></var-tab>
             </var-tabs>
             <var-tabs class="Bar-Right"
                       style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem"
                       v-model:active="show">
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0"><var-icon name="home" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1"><var-icon name="shopping" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="2"><var-icon name="notebook" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0" @click="Activity(0)"><var-icon name="home" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="Activity(1)"><var-icon name="shopping" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="2" @click="Activity(2)"><var-icon name="notebook" /></var-tab>
             </var-tabs>
         </div>
     </var-sticky>
@@ -45,7 +32,7 @@
 
     <div v-if="show == 0" class="all">
         <div class="left" style="width: 20rem;height: 48.7rem;background: #2ecc71;text-align: center">
-            <img src="img/Test.png" class="img-info">
+            <img src="img/Test.png" alt="未加载图片" class="img-info" @click="UpdateUserImage">
             <div style="margin: 10rem 0 0 0"><h3>进入系统</h3></div>
         </div>
         <div class="left Main">
@@ -83,7 +70,7 @@
                 </div>
                 <div style="text-align: center">
                     <var-button text class="button--block" size="large" color="#2196f3ba" @click="UpdateUser">提交</var-button>
-                    <var-button text class="button--block" size="large" color="#2196f3ba">重置</var-button>
+                    <var-button text class="button--block" size="large" color="#2196f3ba" @click="Refresh">重置</var-button>
                 </div>
             </div>
         </div>
@@ -134,7 +121,7 @@
         <var-popup style="height: 48.7rem;background: #fff8;margin: 5rem 0 0 0"
                    position="left" v-model:show="shoplistFN">
             <div style="height: 4rem;">
-                <var-input style="width: 30rem;height: 3rem;padding: 0.5rem 5rem;--field-decorator-text-color:#fff"
+                <var-input style="width: 30rem;height: 3rem;padding: 0.5rem 5rem;--field-decorator-blur-color:#0008;--field-decorator-text-color:#fff"
                            variant="outlined" placeholder="商家名" size="small" v-model="ShopName"/>
             </div>
             <shops-list style="background: #0000;" :shops="shops"></shops-list>
@@ -165,40 +152,80 @@
     <div v-if="show == 2" class="all">
         <div style="width: 45rem;height: 48.7rem;float: left;">
             <order-table-head style="width: 43rem;margin: 4rem 1rem 0;background: #0004"></order-table-head>
-            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>
+<!--            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>-->
+            <div class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" @scroll="LOrdersHandleScroll">
+                <table :style='`transform:translateY(${LOrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirLOrders' :key='item.oid'>
+                        <tr>
+                            <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.oid }}</td>
+                            <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.sid }}</td>
+                            <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.date }}</td>
+                            <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                            <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='updateOrder(item.oid)'><var-icon name='cog' /></var-button></td>
+                            <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='deleteOrder(item.oid)'><var-icon name='delete' /></var-button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div style="width: 6.6rem;height: 48.7rem;float: left;">
             <img style="width: 6.6rem;height: 8.7rem;margin: 19.5rem 0">
         </div>
         <div style="width: 58rem;height: 48.7rem;float: left;">
             <check-order-table-head style="width: 52rem;margin: 4rem 3rem 0;background: #0004"></check-order-table-head>
-            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>
+<!--            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>-->
+            <div class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" @scroll="ROrdersHandleScroll">
+                <table :style='`transform:translateY(${ROrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirROrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.sid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.tid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOwnReview(item.oid)'><var-icon name='message-processing-outline' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <var-popup position="center" style="height: 40rem;" v-model:show="orderFN">
             <div >
                 <div style="margin: 1rem 3rem 0">
-                    <h3>买家编号:{{ order.uid }}</h3><br/>
+                    <h3>买家编号:{{ order.bid }}</h3><br/>
                     <h3>商家编号:{{ order.sid }}</h3><br/>
                     <h3>骑手编号:{{ order.did }}</h3><br/>
-                    <h3>备注:{{ order.info }}</h3><var-button text style="float: right;height: 4rem"><var-icon name='delete' /></var-button></var-button><br/>
+                    <h3>备注:{{ order.info }}</h3></var-button><br/>
                     <h3>订单列表:</h3><br/>
                 </div>
                 <listing-table-head style="width: 40rem;margin: 0 3rem;background: #0004"></listing-table-head>
                 <listing-table-body class="scroll" style="width: 40rem;height: 20rem;margin: 0 3rem;background: #0004" :listingshistory="listingshistory"></listing-table-body>
-<!--                <var-button text style="width: 40rem;margin: 1rem 3rem" type="success">提交</var-button>-->
             </div>
         </var-popup>
         <var-popup position="center" v-model:show="reviewFN" style="height: 40rem">
                 <div style="text-align: center">
                     <h1>历史评论列表</h1>
-                    <var-button text style="float: left;margin: 1rem 3rem" @click="addReview(order.oid)"><var-icon name="plus" /></var-button>
-                    <var-button text style="float: right;margin: 1rem 3rem"><var-icon name="delete" @click="deleteReviews"/></var-button>
+                        <var-button text style="float: left;margin: 1rem 3rem" @click="addReview(order.oid)"><var-icon name="plus" /></var-button>
+                        <var-button text style="float: right;margin: 1rem 3rem"><var-icon name="delete" @click="deleteReviews"/></var-button>
                     <br/>
                     <review-table class="scroll" style="width: 60rem;height: 30rem;margin: 0 3rem;background: #0004" :reviews="reviews"></review-table>
                 </div>
         </var-popup>
     </div>
 </div>
+
+<link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+<script src="js/jquery-1.9.1-min.js"></script>
+<script src="js/jquery.cookie-1.4.1-min.js"></script>
+<script src="js/jquery-confirm-min.js"></script>
+<script src="js/vue-3.3.4-global-min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<!-- 桌面端兼容 -->
+<script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 <script>
     $(function(){
         var canvas = document.querySelector('canvas'),
@@ -353,7 +380,7 @@
         data() {
             return {
                 "show": 0,
-                "pagedate": "",
+                "pagedata": "user",
                 "time": Utils.getTime("hh:mm:ss"),
                 "day": new Date().toDateString(),
                 "SuccessText": false,
@@ -379,21 +406,48 @@
 
                 "products": [],
                 "product":"",
-                "shops": API.getUser(null,null,"shop",null).users,
+                "shops": [],
                 "badge": 0,
                 "ProductName": "",
                 "ShopName": "",
                 "ShopUID": -1,
                 "listings": [],
 
-                "orders": API.getOrder(null,null).orders,
+                "orders": [],
                 "order": "",
+                "LOrders": [],
+                "VirLOrders": [],
+                "LOrdersScrollH":0,
+                "LOrdersShowNum":0,
+                "LOrdersOffsetY":0,
+                "ROrder": [],
+                "VirROrders": [],
+                "ROrdersScrollH":0,
+                "ROrdersShowNum":0,
+                "ROrdersOffsetY":0,
+
                 "listingshistory": [],
+
                 "reviews": [],
 
             }
         },
         watch: {
+            orders(neworders,oldorders) {
+                this.LOrders=this.orders.filter((item)=>item.state==="unpaid");
+                this.LOrdersOffsetY=0;
+                this.LOrdersScrollH=this.LOrders.length*(4*14);
+                this.LOrdersShowNum=Math.floor(38/4)+4;
+                this.VirLOrders=this.LOrders.slice(0,this.LOrdersShowNum);
+                
+                this.ROrders=this.orders.filter((item)=>item.state!=="unpaid");
+                this.ROrdersOffsetY=0;
+                this.ROrdersScrollH=this.ROrders.length*(4*14);
+                this.ROrdersShowNum=Math.floor(38/4)+4;
+                this.VirROrders=this.ROrders.slice(0,this.ROrdersShowNum);
+                
+                this.ScrollTime=new Date().getTime();
+            },
             ShopName(newShopName,oldShopName) {
                 this.shops=API.getUser(null,newShopName,"shop",null).users;
             },
@@ -409,18 +463,128 @@
             },
         },
         methods: {
+            Activity(TODO) {
+                if(TODO === 0) {
+                    this.pagedata="user";
+                } else if(TODO === 1) {
+                    this.pagedata="buy";
+                    this.shops=API.getUser(null,null,"shop",null).users;
+                } else {
+                    this.pagedata="order"
+                    this.orders=API.getOrder(null,null).orders;
+                }
+            },
+            Refresh() {
+                if (this.pagedata === "user") {
+                    API.getUser(this.uid,null,null,(result) => {
+                        if(result.code === 0) {
+                            this.user = result.user;
+                            this.name = this.user.name;
+                            this.password = "";
+                            this.tel = this.user.tel;
+                            this.address = this.user.address;
+                            this.info = this.user.info;
+                        }
+                    })
+                } else if (this.pagedata === "products") {
+                    API.getProduct(null,null,this.ProductName,(result) => {
+                        if(result.code === 0) {
+                            this.products=result.products;
+                        }
+                    })
+                } else if (this.pagedata === "orders") {
+                    API.getOrder(null,(result) => {
+                        if(result.code === 0) {
+                            this.orders=result.orders;
+                        }
+                    })
+                }
+            },
             UpdateUser() {},
+            UpdateUserImage() {
+                var user=API.getUser(this.uid,null,null,null).user;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src="+ user.image + "'img' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    user.image=result.fileName;
+                                    result = API.updateUser(user,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
 
             getProductDetail(pid) {
                 this.productFN=true;
                 this.product=API.getProduct(pid,null,null,null);
             },
-            PostProductList() {this.listFN=false;},
+            PostProductList() {
+                this.listFN=false;
+                this.listings=[];
+            },
 
             getOrderDetail(oid) {
                 this.order=API.getOrder(oid,null).order;
                 this.listingshistory=API.getListing(oid,null).listings;
                 this.orderFN=true;
+            },
+            LOrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.LOrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirLOrders=this.LOrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.LOrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+            ROrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ROrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirROrders=this.ROrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ROrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
             },
             deleteOrderHistory(oid) {},
 
@@ -452,9 +616,18 @@
                 sessionStorage.clear();
                 window.location.href = baseURL;
             },
+            about() {},
         },
         mounted() {
             app=this;
+            this.timer=setInterval(()=>{
+                app.time=Utils.getTime("hh:mm:ss");
+            },1000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer);
+            }
         },
         components: {
             "ProductList": {
@@ -462,7 +635,7 @@
                 template:
                     "<div v-for='item in products' :key='item.pid' class='box' >" +
                     "    <div class='product--img'>" +
-                    "        <img style='width: 16.5rem;height: 10rem;padding: 1rem;' :src='img(item.image)' alt='item.name'/>" +
+                    "        <img style='width: 12.5rem;height: 10rem;padding: 1rem;' :src='img(item.image)' alt='item.name'/>" +
                     "    </div>" +
                     "    <span style='margin: 0 0 0 2rem'>名称:{{ item.name }}</span><br/>" +
                     "    <span style='margin: 0 0 0 2rem'>价格:{{ item.price }}</span><br/>" +
@@ -484,14 +657,16 @@
                     },
                     //此处bug
                     addProduct(pid) {
-                        var listing={};
-                        var product=API.getProduct(pid,app.ShopUID,null,null).product;
-                        listing.uid=app.uid;
-                        listing.pid=product.pid;
-                        listing.name=product.name;
-                        listing.amount=1;
-                        var result=app.listings.some(item=>{ if(item.pid===product.pid) return true; })
-                        if(!result)
+                        var listing = {};
+                        var product = API.getProduct(pid, app.ShopUID, null, null).product;
+                        listing.uid = app.uid;
+                        listing.pid = product.pid;
+                        listing.name = product.name;
+                        listing.amount = 1;
+                        var result = app.listings.some(item => {
+                            if (item.pid === product.pid) return true;
+                        })
+                        if (!result)
                             app.listings.push(listing);
                     },
                 },
@@ -506,7 +681,7 @@
                     "    inactive-color='#0008'" +
                     "    v-model:active='shopnum'>" +
                     "    <var-tab v-for='item in shops' @click='SelectShop(item.uid)'>" +
-                    "        <div style='height: 5rem;text-align: center'>{{ item.uid }}:&emsp;&emsp;{{ item.name }}</div>" +
+                    "        <div style='height: 5rem;text-align: center'>{{ item.name }}</div>" +
                     "    </var-tab>" +
                     "</var-tabs>",
                 data() {
@@ -545,7 +720,7 @@
                 },
                 methods: {
                     deletelist(pid) {
-                        app.listings.filter(item=>(item.pid==pid));
+                        app.listings.filter(item=>(item.pid===pid));
                     },
                 },
             },
@@ -571,13 +746,12 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>时间</th>" +
                     "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
-                    "        <th style='text-align: center;width: 50rem'>操作</th>" +
-                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
+                    "        <th style='text-align: center;width: 50rem'>付款</th>" +
+                    "        <th style='text-align: center;width: 50rem'>取消</th>" +
                     "      </tr>" +
                     "    </thead>" +
                     "</var-table>"
@@ -610,14 +784,12 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>付款凭证</th>" +
                     "        <th style='text-align: center;width: 50rem'>时间</th>" +
                     "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
                     "        <th style='text-align: center;width: 50rem'>发表评论</th>" +
-                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
                     "      </tr>" +
                     "    </thead>" +
                     "</var-table>",
@@ -628,14 +800,12 @@
                     "<var-table>" +
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr v-if='item.state!=\"unpaid\"'>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
-                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
+                    "        <td style='text-align: center;width: 70rem;word-break: break-all'>{{ item.sid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.tid }}</td>" +
-                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
-                    "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOrderDetail(item.oid)'><var-button text><var-icon name='view' /></var-button></td>" +
-                    "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOwnReview(item.oid)'><var-button text><var-icon name='message-processing-outline' /></var-button></td>" +
-                    "        <td style='text-align: center;width: 15rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 60rem;word-break: break-all'>{{ item.date }}</td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all' @click='getOrderDetail(item.oid)'><var-button text><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 35rem;word-break: break-all' @click='getOwnReview(item.oid)'><var-button text><var-icon name='message-processing-outline' /></var-button></td>" +
                     "      </tr>" +
                     "    </tbody>" +
                     "  </var-table>",
@@ -653,11 +823,9 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商品号</th>" +
                     "        <th style='text-align: center;width: 50rem'>数量</th>" +
-                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
                     "      </tr>" +
                     "    </thead>" +
                     "</var-table>",
@@ -668,15 +836,14 @@
                     "<var-table>" +
                     "    <tbody v-for='item in listingshistory' :key='item.lid'>" +
                     "      <tr>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.lid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.pid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.amount }}</td>" +
-                    "        <td style='text-align: center;width: 30rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
                     "      </tr>" +
                     "    </tbody>" +
                     "</var-table>",
             },
+
             "ReviewTable": {
                 props: ["reviews"],
                 template:

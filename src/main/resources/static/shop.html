@@ -21,7 +21,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 </head>
 <body class="broaden">
-<canvas></canvas>
+<!--<canvas></canvas>-->
 <div id="shop" class="container">
     <var-sticky>
         <div class="Top-Bar">
@@ -29,14 +29,14 @@
                       style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
                        --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="logout"><var-icon name="upload"/></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" ><var-icon name="plus"/></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" ><var-icon name="help-circle" /></var-tab>
             </var-tabs>
             <var-tabs class="Bar-Right"
                       style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem"
                       v-model:active="show">
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0"><var-icon name="home" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1"><var-icon name="cart" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="2"><var-icon name="notebook" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0" @click="Activity(0)"><var-icon name="home" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="Activity(1)"><var-icon name="cart" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="2" @click="Activity(2)"><var-icon name="notebook" /></var-tab>
             </var-tabs>
         </div>
     </var-sticky>
@@ -45,7 +45,7 @@
 
     <div v-if="show == 0" class="all">
         <div class="left" style="width: 20rem;height: 48.7rem;background: #2ecc71;text-align: center">
-            <img src="img/Test.png" class="img-info">
+            <img src="img/Test.png" alt="未加载图片" class="img-info" @click="UpdateUserImage"/>
             <div style="margin: 10rem 0 0 0"><h3>进入系统</h3></div>
         </div>
         <div class="left Main">
@@ -83,7 +83,7 @@
                 </div>
                 <div style="text-align: center">
                     <var-button text class="button--block" size="large" color="#2196f3ba" @click="UpdateUser">提交</var-button>
-                    <var-button text class="button--block" size="large" color="#2196f3ba">重置</var-button>
+                    <var-button text class="button--block" size="large" color="#2196f3ba" @click="Refresh">重置</var-button>
                 </div>
             </div>
         </div>
@@ -128,7 +128,6 @@
         <var-popup position="center" v-model:show="productFN" style="height: 40rem;width: 40rem;">
             <div>
                 <div style="text-align: center"><h1 style="margin: 2rem">商品信息</h1></div>
-                <h3 style="margin: 0 2rem">商家编号:{{ product.uid }}</h3><br/>
                 <h3 style="margin: 0 2rem">商品编号:{{ product.pid }}</h3><br/>
                 <h3 style="margin: 0 2rem">名称:{{ product.name }}</h3><br/>
                 <h3 style="margin: 0 2rem">价格:{{ product.price }}</h3><br/>
@@ -141,14 +140,42 @@
     <div v-if="show == 2" class="all">
         <div style="width: 45rem;height: 48.7rem;float: left;">
             <order-table-head style="width: 43rem;margin: 4rem 1rem 0;background: #0004"></order-table-head>
-            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>
+<!--            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>-->
+            <div class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" @scroll="LOrdersHandleScroll">
+                <table :style='`transform:translateY(${LOrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirLOrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.sid }}</td>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='updateOrder(item.oid)'><var-icon name='cog' /></var-button></td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='deleteOrder(item.oid)'><var-icon name='delete' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div style="width: 6.6rem;height: 48.7rem;float: left;">
             <img style="width: 6.6rem;height: 8.7rem;margin: 19.5rem 0">
         </div>
         <div style="width: 58rem;height: 48.7rem;float: left;">
             <check-order-table-head style="width: 52rem;margin: 4rem 3rem 0;background: #0004"></check-order-table-head>
-            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>
+<!--            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>-->
+            <div class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" @scroll="ROrdersHandleScroll">
+                <table :style='`transform:translateY(${ROrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirROrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.sid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.tid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOwnReview(item.oid)'><var-icon name='message-processing-outline' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <var-popup position="center" style="height: 40rem;" v-model:show="orderFN">
             <div >
@@ -320,6 +347,7 @@
         data() {
             return {
                 "show": 0,
+                "pagedata": "user",
                 "time": Utils.getTime("hh:mm:ss"),
                 "day": new Date().toDateString(),
                 "SuccessText": false,
@@ -348,23 +376,229 @@
 
                 "reviews": [],
                 "orders": [],
+                "LOrders": [],
+                "VirLOrders": [],
+                "LOrdersScrollH":0,
+                "LOrdersShowNum":0,
+                "LOrdersOffsetY":0,
+                "ROrder": [],
+                "VirROrders": [],
+                "ROrdersScrollH":0,
+                "ROrdersShowNum":0,
+                "ROrdersOffsetY":0,
+
+
                 "listings": [],
             }
         },
         methods: {
+            Activity(TODO) {
+                if (TODO === 0) {
+                    API.getUser(null, null, null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "user";
+                            this.users = result.users;
+                        }
+                    })
+                } else if (TODO === 1) {
+                    API.getProduct(null,null,null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "products";
+                            this.products = result.products;
+                        }
+                    })
+                } else if (TODO === 2) {
+                    API.getOrder(null, (result) => {
+                        if (result.code === 0) {
+                            this.pagedata = "orders";
+                            this.orders = result.orders;
+                            this.listings = result.listings;
+                        }
+                    })
+                }
+            },
+            Refresh() {
+                if (this.pagedata === "user") {
+                    API.getUser(this.uid,null,null,(result) => {
+                        if(result.code === 0) {
+                            this.user = result.user;
+                            this.name = this.user.name;
+                            this.password = "";
+                            this.tel = this.user.tel;
+                            this.address = this.user.address;
+                            this.info = this.user.info;
+                        }
+                    })
+                } else if (this.pagedata === "products") {
+                    API.getProduct(null,null,this.ProductName,(result) => {
+                        if(result.code === 0) {
+                            this.products=result.products;
+                        }
+                    })
+                } else if (this.pagedata === "orders") {
+                    API.getOrder(null,(result) => {
+                        if(result.code === 0) {
+                            this.orders=result.orders;
+                        }
+                    })
+                }
+            },
             UpdateUser() {},
+            UpdateUserImage() {
+                var user=API.getUser(this.uid,null,null,null).user;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src='img/"+ user.image + "' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    user.image=result.fileName;
+                                    result = API.updateUser(user,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
 
             addProduct() {},
             getProductDetail(pid) {
                 this.productFN=true;
                 this.product=API.getProduct(pid,null,null,null).product;
             },
-            UpdateProduct(pid) {},
+            UpdateProduct(product) {},
             deleteProduct(pid) {},
-
-            img(image) {
-                return "img/"+image;
+            UpdateProductImage(pid) {
+                var product=API.getProduct(pid,null,null,null).product;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src='img/"+ product.image + "' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    product.image=result.fileName;
+                                    result = API.updateProduct(product,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
             },
+
+            getOrderDetail(oid) {
+                this.order=API.getOrder(oid,null).order;
+                this.listingshistory=API.getListing(oid,null).listings;
+                this.orderFN=true;
+            },
+            updateOrder() {},
+            deleteOrder() {},
+
+            LOrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.LOrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirLOrders=this.LOrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.LOrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+            ROrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ROrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirROrders=this.ROrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ROrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+
+            input(fileDom) {
+                if (window.FileReader) {
+                    var reader = new FileReader();
+                } else {
+                    alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+                }
+                var file = fileDom.files[0];
+                var imageType = /^image\//;
+                if (!imageType.test(file.type)) {
+                    alert("请选择图片！");
+                    return;
+                }
+                reader.onload = function (e) {
+                    var img = document.getElementById("img");
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+            img(image) {return "img/"+image; },
             logout() {
                 $.ajax({
                     type: "POST",
@@ -383,12 +617,35 @@
             },
         },
         watch: {
+            orders(neworders,oldorders) {
+                this.LOrders=this.orders.filter((item)=>item.state==="paid");
+                this.LOrdersOffsetY=0;
+                this.LOrdersScrollH=this.LOrders.length*(4*14);
+                this.LOrdersShowNum=Math.floor(38/4)+4;
+                this.VirLOrders=this.LOrders.slice(0,this.LOrdersShowNum);
+
+                this.ROrders=this.orders.filter((item)=>item.state!=="paid");
+                this.ROrdersOffsetY=0;
+                this.ROrdersScrollH=this.ROrders.length*(4*14);
+                this.ROrdersShowNum=Math.floor(38/4)+4;
+                this.VirROrders=this.ROrders.slice(0,this.ROrdersShowNum);
+
+                this.ScrollTime=new Date().getTime();
+            },
             ProductName(newProductName,oldProductName) {
                 this.products=API.getProduct(null,app.uid,newProductName,null);
             },
         },
-        mounted(){
+        mounted() {
             app=this;
+            this.timer=setInterval(()=>{
+                app.time=Utils.getTime("hh:mm:ss");
+            },1000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer);
+            }
         },
         components: {
             "ProductList": {
@@ -396,7 +653,7 @@
                 template:
                     "<div v-for='item in products' :key='item.pid' class='box' >" +
                     "    <div class='product--img'>" +
-                    "        <img style='width: 16.5rem;height: 10rem;padding: 1rem;' :src='img(item.image)' alt='item.name'/>" +
+                    "        <img style='width: 12.5rem;height: 10rem;padding: 1rem;' :src='img(item.image)' alt='item.name' @click='UpdateProductImage(item.pid)'/>" +
                     "    </div>" +
                     "    <span style='margin: 0 0 0 2rem'>名称:{{ item.name }}</span><br/>" +
                     "    <span style='margin: 0 0 0 2rem'>价格:{{ item.price }}</span><br/>" +
@@ -411,17 +668,11 @@
                     }
                 },
                 methods: {
-                    img(image) {
-                        return "img/"+image;
-                    },
-                    getProductDetail(pid) {
-                        app.getProductDetail(pid);
-                    },
-                    UpdateProduct(product) {
-                    },
-                    deleteProduct(pid) {
-                        app.deleteProduct(pid);
-                    }
+                    img(image) { return "img/"+image; },
+                    getProductDetail(pid) { app.getProductDetail(pid); },
+                    UpdateProduct(product) { app.UpdateProduct(product); },
+                    deleteProduct(pid) { app.deleteProduct(pid); },
+                    UpdateProductImage(pid) { app.UpdateProductImage(pid); },
                 },
             },
             "AllReview": {
@@ -446,7 +697,6 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>时间</th>" +
@@ -463,7 +713,6 @@
                     "<var-table>" +
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr v-if='item.state==\"unpaid\"'>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
@@ -484,7 +733,6 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>付款凭证</th>" +
@@ -502,7 +750,6 @@
                     "<var-table>" +
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr v-if='item.state!=\"unpaid\"'>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.tid }}</td>" +

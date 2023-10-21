@@ -1,461 +1,122 @@
-<!--<!doctype html>-->
-<!--<html>-->
-<!--<head>-->
-<!--    <meta charset="utf-8">-->
-<!--    <title>HTML5 Canvas全屏背景动画</title>-->
-<!--    <link rel="stylesheet" type="text/css" href="css/general.css">-->
-<!--    <script src="js/utils.js"></script>-->
-<!--    <style>-->
-<!--        body {-->
-<!--            background: #060e1b;-->
-<!--            overflow: hidden;-->
-<!--        }-->
-<!--        .codrops-demos {-->
-<!--            font-size: 0.8em;-->
-<!--            text-align:center;-->
-<!--            position:absolute;-->
-<!--            z-index:99;-->
-<!--            width:96%;-->
-<!--        }-->
-<!--        .codrops-demos a {-->
-<!--            display: inline-block;-->
-<!--            margin: 0.35em 0.1em;-->
-<!--            padding: 0.5em 1.2em;-->
-<!--            outline: none;-->
-<!--            text-decoration: none;-->
-<!--            text-transform: uppercase;-->
-<!--            letter-spacing: 1px;-->
-<!--            font-weight: 700;-->
-<!--            border-radius: 2px;-->
-<!--            font-size: 110%;-->
-<!--            border: 2px solid transparent;-->
-<!--            color:#fff;-->
-<!--        }-->
-<!--        .codrops-demos a:hover,-->
-<!--        .codrops-demos a.current-demo {-->
-<!--            border-color: #383a3c;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<canvas id="canvas"></canvas>-->
-<!--<script>-->
-<!--    "use strict";-->
-<!--    var canvas = document.getElementById('canvas'),-->
-<!--        ctx = canvas.getContext('2d'),-->
-<!--        w = canvas.width = window.innerWidth,-->
-<!--        h = canvas.height = window.innerHeight,-->
-<!--        hue = 217,-->
-<!--        stars = [],-->
-<!--        count = 0,-->
-<!--        maxStars = 1400;-->
-<!--    var canvas2 = document.createElement('canvas'),-->
-<!--        ctx2 = canvas2.getContext('2d');-->
-<!--    canvas2.width = 100;-->
-<!--    canvas2.height = 100;-->
-<!--    var half = canvas2.width/2,-->
-<!--        gradient2 = ctx2.createRadialGradient(half, half, 0, half, half, half);-->
-<!--    gradient2.addColorStop(0.025, '#fff');-->
-<!--    gradient2.addColorStop(0.1, 'hsl(' + hue + ', 61%, 33%)');-->
-<!--    gradient2.addColorStop(0.25, 'hsl(' + hue + ', 64%, 6%)');-->
-<!--    gradient2.addColorStop(1, 'transparent');-->
-<!--    ctx2.fillStyle = gradient2;-->
-<!--    ctx2.beginPath();-->
-<!--    ctx2.arc(half, half, half, 0, Math.PI * 2);-->
-<!--    ctx2.fill();-->
-<!--    // End cache-->
-<!--    function random(min, max) {-->
-<!--        if (arguments.length < 2) {-->
-<!--            max = min;-->
-<!--            min = 0;-->
-<!--        }-->
-<!--        if (min > max) {-->
-<!--            var hold = max;-->
-<!--            max = min;-->
-<!--            min = hold;-->
-<!--        }-->
-<!--        return Math.floor(Math.random() * (max - min + 1)) + min;-->
-<!--    }-->
-<!--    var Star = function() {-->
-<!--        this.orbitRadius = random(w / 2 - 50);-->
-<!--        this.radius = random(100, this.orbitRadius) / 10;-->
-<!--        this.orbitX = w / 2;-->
-<!--        this.orbitY = h / 2;-->
-<!--        this.timePassed = random(0, maxStars);-->
-<!--        this.speed = random(this.orbitRadius) / 900000;-->
-<!--        this.alpha = random(2, 10) / 10;-->
-<!--        count++;-->
-<!--        stars[count] = this;-->
-<!--    }-->
-<!--    Star.prototype.draw = function() {-->
-<!--        var x = Math.sin(this.timePassed + 1) * this.orbitRadius + this.orbitX,-->
-<!--            y = Math.cos(this.timePassed) * this.orbitRadius/2 + this.orbitY,-->
-<!--            twinkle = random(10);-->
-<!--        if (twinkle === 1 && this.alpha > 0) {-->
-<!--            this.alpha -= 0.05;-->
-<!--        } else if (twinkle === 2 && this.alpha < 1) {-->
-<!--            this.alpha += 0.05;-->
-<!--        }-->
-<!--        ctx.globalAlpha = this.alpha;-->
-<!--        ctx.drawImage(canvas2, x - this.radius / 2, y - this.radius / 2, this.radius, this.radius);-->
-<!--        this.timePassed += this.speed;-->
-<!--    }-->
-<!--    for (var i = 0; i < maxStars; i++) {-->
-<!--        new Star();-->
-<!--    }-->
-<!--    function animation() {-->
-<!--        ctx.globalCompositeOperation = 'source-over';-->
-<!--        ctx.globalAlpha = 0.8;-->
-<!--        ctx.fillStyle = 'hsla(' + hue + ', 64%, 6%, 1)';-->
-<!--        ctx.fillRect(0, 0, w, h)-->
-<!--        ctx.globalCompositeOperation = 'lighter';-->
-<!--        for (var i = 1, l = stars.length; i < l; i++) {-->
-<!--            stars[i].draw();-->
-<!--        };-->
-<!--        window.requestAnimationFrame(animation);-->
-<!--    }-->
-<!--    animation();-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
-
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>Title</title>-->
-<!--    <script src="js/utils.js"></script>-->
-<!--</head>-->
-<!--<style>-->
-<!--    html{height: 100%}-->
-<!--    body{margin: 0;height: 100%;-->
-<!--        background: #fff;}-->
-<!--    canvas{display: block;width: 100%;height: 100%;}-->
-<!--</style>-->
-<!--<body>-->
-<!--<body>-->
-<!--<canvas id="canvas"></canvas>-->
-<!--<dic>aaaaa</dic>-->
-<!--</body>-->
-<!--</body>-->
-<!--<script>-->
-<!--    class Circle {-->
-<!--        //创建对象-->
-<!--        //以一个圆为对象-->
-<!--        //设置随机的 x，y坐标，r半径，_mx，_my移动的距离-->
-<!--        //this.r是创建圆的半径，参数越大半径越大-->
-<!--        //this._mx,this._my是移动的距离，参数越大移动-->
-<!--        constructor(x, y) {-->
-<!--            this.x = x;-->
-<!--            this.y = y;-->
-<!--            this.r = Math.random() * 10 ;-->
-<!--            this._mx = Math.random() ;-->
-<!--            this._my = Math.random() ;-->
-
-<!--        }-->
-
-<!--        //canvas 画圆和画直线-->
-<!--        //画圆就是正常的用canvas画一个圆-->
-<!--        //画直线是两个圆连线，为了避免直线过多，给圆圈距离设置了一个值，距离很远的圆圈，就不做连线处理-->
-<!--        drawCircle(ctx) {-->
-<!--            ctx.beginPath();-->
-<!--            //arc() 方法使用一个中心点和半径，为一个画布的当前子路径添加一条弧。-->
-<!--            ctx.arc(this.x, this.y, this.r, 0, 360)-->
-<!--            ctx.closePath();-->
-<!--            ctx.fillStyle = 'rgba(204, 204, 204, 0.8)';-->
-<!--            ctx.fill();-->
-<!--        }-->
-
-<!--        drawLine(ctx, _circle) {-->
-<!--            let dx = this.x - _circle.x;-->
-<!--            let dy = this.y - _circle.y;-->
-<!--            let d = Math.sqrt(dx * dx + dy * dy)-->
-<!--            if (d < 150) {-->
-<!--                ctx.beginPath();-->
-<!--                //开始一条路径，移动到位置 this.x,this.y。创建到达位置 _circle.x,_circle.y 的一条线：-->
-<!--                ctx.moveTo(this.x, this.y);   //起始点-->
-<!--                ctx.lineTo(_circle.x, _circle.y);   //终点-->
-<!--                ctx.closePath();-->
-<!--                ctx.strokeStyle = 'rgba(204, 204, 204, 0.3)';-->
-<!--                ctx.stroke();-->
-<!--            }-->
-<!--        }-->
-
-<!--        // 圆圈移动-->
-<!--        // 圆圈移动的距离必须在屏幕范围内-->
-<!--        move(w, h) {-->
-<!--            this._mx = (this.x < w && this.x > 0) ? this._mx : (-this._mx);-->
-<!--            this._my = (this.y < h && this.y > 0) ? this._my : (-this._my);-->
-<!--            this.x += this._mx / 2;-->
-<!--            this.y += this._my / 2;-->
-<!--        }-->
-<!--    }-->
-<!--    //鼠标点画圆闪烁变动-->
-<!--    class currentCirle extends Circle {-->
-<!--        constructor(x, y) {-->
-<!--            super(x, y)-->
-<!--        }-->
-
-<!--        drawCircle(ctx) {-->
-<!--            ctx.beginPath();-->
-<!--            //注释内容为鼠标焦点的地方圆圈半径变化-->
-<!--            //this.r = (this.r < 14 && this.r > 1) ? this.r + (Math.random() * 2 - 1) : 2;-->
-<!--            this.r = 8;-->
-<!--            ctx.arc(this.x, this.y, this.r, 0, 360);-->
-<!--            ctx.closePath();-->
-<!--            //ctx.fillStyle = 'rgba(0,0,0,' + (parseInt(Math.random() * 100) / 100) + ')'-->
-<!--            ctx.fillStyle = 'rgba(255, 77, 54, 0.6)'-->
-<!--            ctx.fill();-->
-
-<!--        }-->
-<!--    }-->
-<!--    //更新页面用requestAnimationFrame替代setTimeout-->
-<!--    window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;-->
-
-<!--    let canvas = document.getElementById('canvas');-->
-<!--    let ctx = canvas.getContext('2d');-->
-<!--    let w = canvas.width = canvas.offsetWidth;-->
-<!--    let h = canvas.height = canvas.offsetHeight;-->
-<!--    let circles = [];-->
-<!--    let current_circle = new currentCirle(0, 0)-->
-
-<!--    let draw = function () {-->
-<!--        ctx.clearRect(0, 0, w, h);-->
-<!--        for (let i = 0; i < circles.length; i++) {-->
-<!--            circles[i].move(w, h);-->
-<!--            circles[i].drawCircle(ctx);-->
-<!--            for (j = i + 1; j < circles.length; j++) {-->
-<!--                circles[i].drawLine(ctx, circles[j])-->
-<!--            }-->
-<!--        }-->
-<!--        if (current_circle.x) {-->
-<!--            current_circle.drawCircle(ctx);-->
-<!--            for (var k = 1; k < circles.length; k++) {-->
-<!--                current_circle.drawLine(ctx, circles[k])-->
-<!--            }-->
-<!--        }-->
-<!--        requestAnimationFrame(draw)-->
-<!--    }-->
-
-<!--    let init = function (num) {-->
-<!--        for (var i = 0; i < num; i++) {-->
-<!--            circles.push(new Circle(Math.random() * w, Math.random() * h));-->
-<!--        }-->
-<!--        draw();-->
-<!--    }-->
-<!--    window.addEventListener('load', init(60));-->
-<!--    window.onmousemove = function (e) {-->
-<!--        e = e || window.event;-->
-<!--        current_circle.x = e.clientX;-->
-<!--        current_circle.y = e.clientY;-->
-<!--    }-->
-<!--    window.onmouseout = function () {-->
-<!--        current_circle.x = null;-->
-<!--        current_circle.y = null;-->
-
-<!--    };-->
-<!--</script>-->
-<!--</html>-->
-
-
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>彩色点缀(鼠标联线)</title>
+    <link rel="stylesheet" type="text/css" href="css/general.css">
 
-    <!-- 依赖JQuery -->
-    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- END -->
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
 
-    <style>
-        html, body { background: #fff; margin: 0; padding:0;}
-        canvas { width: 100%; height: 100%; position: absolute; }
-
-        /* Demo Buttons Style */
-        .codrops-demos {
-            font-size: 0.8em;
-            text-align:center;
-            position:absolute;
-            z-index:99;
-            width:96%;
-        }
-
-        .codrops-demos a {
-            display: inline-block;
-            margin: 0.35em 0.1em;
-            padding: 0.5em 1.2em;
-            outline: none;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-            border-radius: 2px;
-            font-size: 110%;
-            border: 2px solid transparent;
-            color:#fff;
-        }
-
-        .codrops-demos a:hover,
-        .codrops-demos a.current-demo {
-            border-color: #383a3c;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 </head>
 <body>
-
-<canvas></canvas>
-
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        box-sizing: border-box;
+    }
+    li{
+        text-align: center;
+        line-height: 60px;
+        border-bottom: 1px solid red;
+    }
+    .scroll
+    {
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+    .scroll::-webkit-scrollbar
+    {
+        display: none;
+    }
+</style>
+<div id="abcd" style="background: #9b59b6">
+<!--    <div style="width:200px;height: 200px;overflow-y:scroll;" @scroll="handleScroll">-->
+<!--        <ul>-->
+<!--            <li :style="`transform:translateY(${offsetY}px);height:${itemH}px`" v-for="i in clist" :key="i">{{i}}</li>-->
+<!--        </ul>-->
+<!--    </div>-->
+    <div class="scroll" style="width:200px;height: 500px" @scroll="handleScroll">
+        <table :style='`transform:translateY(${offsetY}px)`'>
+            <tbody style="height: 60px" v-for="item in clist" :key="item">
+            <tr class="test">
+                <td class="cell" style="width: 55rem">列1:<var-button text>按钮{{ item }}</var-button></td>
+                <td style="text-align: center;width: 55rem;word-break: break-all">列2:{{ item }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+<!--    <div class="scroll" style="width:200px;height: 500px" @scroll="handleScroll">-->
+<!--        <test-table :clist="clist" :offsetY="offsetY"></test-table>-->
+<!--    </div>-->
+</div>
 <script>
-    $(function(){
-        var canvas = document.querySelector('canvas'),
-            ctx = canvas.getContext('2d')
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        ctx.lineWidth = .3;
-        ctx.strokeStyle = (new Color(150)).style;
-
-        var mousePosition = {
-            x: 30 * canvas.width / 100,
-            y: 30 * canvas.height / 100
-        };
-
-        var dots = {
-            nb: 750,
-            distance: 50,
-            d_radius: 100,
-            array: []
-        };
-
-        function colorValue(min) {
-            return Math.floor(Math.random() * 255 + min);
-        }
-
-        function createColorStyle(r,g,b) {
-            return 'rgba(' + r + ',' + g + ',' + b + ', 0.8)';
-        }
-
-        function mixComponents(comp1, weight1, comp2, weight2) {
-            return (comp1 * weight1 + comp2 * weight2) / (weight1 + weight2);
-        }
-
-        function averageColorStyles(dot1, dot2) {
-            var color1 = dot1.color,
-                color2 = dot2.color;
-
-            var r = mixComponents(color1.r, dot1.radius, color2.r, dot2.radius),
-                g = mixComponents(color1.g, dot1.radius, color2.g, dot2.radius),
-                b = mixComponents(color1.b, dot1.radius, color2.b, dot2.radius);
-            return createColorStyle(Math.floor(r), Math.floor(g), Math.floor(b));
-        }
-
-        function Color(min) {
-            min = min || 0;
-            this.r = colorValue(min);
-            this.g = colorValue(min);
-            this.b = colorValue(min);
-            this.style = createColorStyle(this.r, this.g, this.b);
-        }
-
-        function Dot(){
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-
-            this.vx = -.5 + Math.random();
-            this.vy = -.5 + Math.random();
-
-            this.radius = Math.random() * 2;
-
-            this.color = new Color();
-            console.log(this);
-        }
-
-        Dot.prototype = {
-            draw: function(){
-                ctx.beginPath();
-                ctx.fillStyle = this.color.style;
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                ctx.fill();
+    var lst=[];
+    for(var index=0;index<1000;index++) {lst.push(index)}
+    var { createApp } = Vue;
+    var app;
+    var container = createApp({
+        data() {
+            return {
+                "list": [],
+                "clist":[],
+                "viewH":500,
+                "itemH":60,
+                "scrollH":'',
+                "showNum":'',
+                "offsetY":0,
+                "lastTime":0,
             }
-        };
-
-        function createDots(){
-            for(i = 0; i < dots.nb; i++){
-                dots.array.push(new Dot());
-            }
-        }
-
-        function moveDots() {
-            for(i = 0; i < dots.nb; i++){
-
-                var dot = dots.array[i];
-
-                if(dot.y < 0 || dot.y > canvas.height){
-                    dot.vx = dot.vx;
-                    dot.vy = - dot.vy;
-                }
-                else if(dot.x < 0 || dot.x > canvas.width){
-                    dot.vx = - dot.vx;
-                    dot.vy = dot.vy;
-                }
-                dot.x += dot.vx;
-                dot.y += dot.vy;
-            }
-        }
-
-        function connectDots() {
-            for(i = 0; i < dots.nb; i++){
-                for(j = 0; j < dots.nb; j++){
-                    i_dot = dots.array[i];
-                    j_dot = dots.array[j];
-
-                    if((i_dot.x - j_dot.x) < dots.distance && (i_dot.y - j_dot.y) < dots.distance && (i_dot.x - j_dot.x) > - dots.distance && (i_dot.y - j_dot.y) > - dots.distance){
-                        if((i_dot.x - mousePosition.x) < dots.d_radius && (i_dot.y - mousePosition.y) < dots.d_radius && (i_dot.x - mousePosition.x) > - dots.d_radius && (i_dot.y - mousePosition.y) > - dots.d_radius){
-                            ctx.beginPath();
-                            ctx.strokeStyle = averageColorStyles(i_dot, j_dot);
-                            ctx.moveTo(i_dot.x, i_dot.y);
-                            ctx.lineTo(j_dot.x, j_dot.y);
-                            ctx.stroke();
-                            ctx.closePath();
-                        }
-                    }
+        },
+        mounted() {
+            app=this;
+            this.list=lst;
+            this.scrollH=this.list.length * this.itemH;
+            this.showNum=Math.floor(this.viewH/this.itemH)+4;
+            this.clist=this.list.slice(0,this.showNum);
+            this.lastTime=new Date().getTime();
+        },
+        methods: {
+            handleScroll(e) {
+                if(new Date().getTime()-this.lastTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.offsetY=scrollTop-(scrollTop% this.itemH);
+                    this.clist=this.list.slice(
+                        Math.floor(scrollTop/this.itemH),
+                        Math.floor(scrollTop/this.itemH)+this.showNum
+                    )
+                    // console.log(scrollTop,this.showNum,scrollTop/this.itemH+this.showNum,this.clist)
+                    this.lastTime=new Date().getTime();
                 }
             }
-        }
-
-        function drawDots() {
-            for(i = 0; i < dots.nb; i++){
-                var dot = dots.array[i];
-                dot.draw();
+        },
+        components: {
+            "TestTable": {
+                props: ["clist", "offsetY"],
+                template:
+                    "<table :style='`transform:translateY(${offsetY}px)`'>" +
+                    "    <tbody style='height: 60px' v-for='item in clist' :key='item'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>列1:{{ item }}</td>" +
+                    "        <td style='text-align: center;width: 55rem;word-break: break-all'>列2:{{ item }}</td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</table>",
             }
         }
-
-        function animateDots() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            moveDots();
-            connectDots();
-            drawDots();
-
-            requestAnimationFrame(animateDots);
-        }
-
-        $('canvas').on('mousemove', function(e){
-            mousePosition.x = e.pageX;
-            mousePosition.y = e.pageY;
-        });
-
-        $('canvas').on('mouseleave', function(e){
-            mousePosition.x = canvas.width / 2;
-            mousePosition.y = canvas.height / 2;
-        });
-
-        createDots();
-        requestAnimationFrame(animateDots);
-    });
+    })
+    container.use(Varlet).mount("#abcd");
 </script>
 </body>
 </html>

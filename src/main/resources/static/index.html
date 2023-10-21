@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 </head>
 <body class="body">
-<div id="app" class="main">
+<div id="login" class="main">
     <div class="div-img">
         <div class="DivImg"></div>
     </div>
@@ -40,6 +40,7 @@
             <var-button class="button-login" @click="login">登陆</var-button>
             <var-button class="button-login" @click="to_registered">注册</var-button>
             <var-button class="button-about" @click="to_about">关于</var-button>
+            <var-button class="button-guest"  @click="to_guest">以游客进入</var-button>
         </div>
     </div>
 </div>
@@ -179,15 +180,42 @@
                     animationBounce: 1.5
                 })
             },
-            to_about(){
-
+            to_about() {},
+            to_guest() {
+                $.ajax({
+                    type: "POST",
+                    url: $.cookie("baseURL") + "to_guest",
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code === 0) {
+                            window.location.href = $.cookie("baseURL") + data.url;
+                        } else {
+                            $.alert({
+                                title: "提示",
+                                content: "<h3>登陆失败</h3><h5>错误代码: "
+                                    + data.code + "</h5><h5>错误提示: "
+                                    + data.message + "</h5>",
+                                buttons: {
+                                    ok: {
+                                        text: "好"
+                                    }
+                                },
+                                boxWidth: "30%",
+                                useBootstrap: false,
+                                theme: "material",
+                                animationBounce: 1.5,
+                            })
+                        }
+                    }
+                })
             }
         },
         mounted() {
             app = this;
         },
     })
-    container.use(Varlet).mount("#app")
+    container.use(Varlet).mount("#login")
 </script>
 </body>
 </html>

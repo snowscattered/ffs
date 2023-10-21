@@ -70,3 +70,10 @@ canvas
     transition: 0.6s;
     transform: translate(0,-2rem);
 }
+.product--img
+{
+    width: 14.5rem;
+    height: 12rem;
+    margin: 1rem 2rem 0;
+    padding: 0;
+}

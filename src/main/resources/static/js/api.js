@@ -23,13 +23,13 @@ class API {
             },
             complete: function (XMLHttpRequest, textStatus) {
                 if (textStatus === "success") {
-                    return obj.fileName;
+                    return obj;
                 } else {
                     obj = {"fileName": "error", "code": -1, "message": "error"}
                 }
             }
         })
-        return obj
+        return obj;
     }
 
 
@@ -494,6 +494,35 @@ class API {
         })
         return obj;
     }
+    static addOrder(order, listings) {
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/order/add",
+            async: false,
+            contentType: "application/json",
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "order": order,
+                "listings": listings,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data;
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            },
+        })
+        return obj;
+    }
     static updateOrder(order, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
@@ -606,7 +635,7 @@ class API {
     }
 
 
-    static getListing(oid, callback, args) {
+    static getListing(oid, lid, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",
@@ -615,6 +644,7 @@ class API {
                 data: JSON.stringify({
                     "token": $.cookie("token"),
                     "oid": oid,
+                    "lid": lid,
                 }),
                 timeout: 2000,
                 dataType: "json",
@@ -643,6 +673,145 @@ class API {
             data: JSON.stringify({
                 "token": $.cookie("token"),
                 "oid": oid,
+                "lid": lid,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            }
+        })
+        return obj;
+    }
+    static addListing(listings) {
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/listing/add",
+            async: false,
+            contentType: "application/json",
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "listings": listings,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data;
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            },
+        })
+        return obj;
+    }
+    static updateListing(listing, callback, args) {
+        if(callback !== null && callback !== undefined) {
+            $.ajax({
+                type: "POST",
+                url: this.baseURL + "api/listing/update",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "token": $.cookie("token"),
+                    "listing": listing,
+                }),
+                timeout: 2000,
+                dataType: "json",
+                success: function (data) {
+                    callback(data, args)
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus === "success") {
+                        return;
+                    } else if (textStatus === "timeout") {
+                        obj = {"code": -1, "message": "超时"};
+                        callback(obj, args)
+                    } else {
+                        obj = {"code": -1, "message": "客户端错误"};
+                        callback(obj,args)
+                    }
+                }
+            })
+        }
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/listing/update",
+            contentType: "application/json",
+            async: false,
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "listing": listing,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            }
+        })
+        return obj;
+    }
+    static deleteListing(lid, callback, args) {
+        if(callback !== null && callback !== undefined) {
+            $.ajax({
+                type: "POST",
+                url: this.baseURL + "api/listing/delete",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "token": $.cookie("token"),
+                    "lid": lid,
+                }),
+                timeout: 2000,
+                dataType: "json",
+                success: function (data) {
+                    callback(data, args)
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus === "success") {
+                        return;
+                    } else if (textStatus === "timeout") {
+                        obj = {"code": -1, "message": "超时"};
+                        callback(obj, args)
+                    } else {
+                        obj = {"code": -1, "message": "客户端错误"};
+                        callback(obj,args)
+                    }
+                }
+            })
+        }
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/listing/delete",
+            contentType: "application/json",
+            async: false,
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "lid": lid,
             }),
             timeout: 2000,
             dataType: "json",
@@ -662,15 +831,17 @@ class API {
         return obj;
     }
 
-    static getReview(oid, callback, args) {
+
+    static getReview(oid, rid, callback, args) {
         if(callback !== null && callback !== undefined) {
             $.ajax({
                 type: "POST",
-                url: this.baseURL + "api/listing/get",
+                url: this.baseURL + "api/review/get",
                 contentType: "application/json",
                 data: JSON.stringify({
                     "token": $.cookie("token"),
                     "oid": oid,
+                    "rid": rid,
                 }),
                 timeout: 2000,
                 dataType: "json",
@@ -693,12 +864,13 @@ class API {
         var obj;
         $.ajax({
             type: "POST",
-            url: this.baseURL + "api/listing/get",
+            url: this.baseURL + "api/review/get",
             contentType: "application/json",
             async: false,
             data: JSON.stringify({
                 "token": $.cookie("token"),
                 "oid": oid,
+                "rid": rid,
             }),
             timeout: 2000,
             dataType: "json",
@@ -717,4 +889,143 @@ class API {
         })
         return obj;
     }
+    static addReview(review) {
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/review/add",
+            async: false,
+            contentType: "application/json",
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "review": review,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data;
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            },
+        })
+        return obj;
+    }
+    static updateReview(review,callback,args) {
+        if(callback !== null && callback !== undefined) {
+            $.ajax({
+                type: "POST",
+                url: this.baseURL + "api/review/update",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "token": $.cookie("token"),
+                    "review": review,
+                }),
+                timeout: 2000,
+                dataType: "json",
+                success: function (data) {
+                    callback(data, args)
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus === "success") {
+                        return;
+                    } else if (textStatus === "timeout") {
+                        obj = {"code": -1, "message": "超时"};
+                        callback(obj, args)
+                    } else {
+                        obj = {"code": -1, "message": "客户端错误"};
+                        callback(obj,args)
+                    }
+                }
+            })
+        }
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/review/update",
+            contentType: "application/json",
+            async: false,
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "review": review,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            }
+        })
+        return obj;
+    }
+    static deleteReview(rid, callback, args) {
+        if(callback !== null && callback !== undefined) {
+            $.ajax({
+                type: "POST",
+                url: this.baseURL + "api/review/delete",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "token": $.cookie("token"),
+                    "rid": rid,
+                }),
+                timeout: 2000,
+                dataType: "json",
+                success: function (data) {
+                    callback(data, args)
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if (textStatus === "success") {
+                        return;
+                    } else if (textStatus === "timeout") {
+                        obj = {"code": -1, "message": "超时"};
+                        callback(obj, args)
+                    } else {
+                        obj = {"code": -1, "message": "客户端错误"};
+                        callback(obj,args)
+                    }
+                }
+            })
+        }
+        var obj;
+        $.ajax({
+            type: "POST",
+            url: this.baseURL + "api/review/delete",
+            contentType: "application/json",
+            async: false,
+            data: JSON.stringify({
+                "token": $.cookie("token"),
+                "rid": rid,
+            }),
+            timeout: 2000,
+            dataType: "json",
+            success: function (data) {
+                obj = data
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if (textStatus === "success") {
+                    return obj;
+                } else if (textStatus === "timeout") {
+                    obj = {"code": -1, "message": "超时"};
+                } else {
+                    obj = {"code": -1, "message": "客户端错误"};
+                }
+            }
+        })
+        return obj;
+    }
+
 }

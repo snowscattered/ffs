@@ -56,12 +56,12 @@ public class ReviewAPI
             return objs;
         }
 
-        int checkpid = 0,checkoid=0;
+        int checkuid = 0,checkoid=0;
         if(!pid.equals(""))
         {
             try
             {
-                checkpid=Integer.parseInt(pid);
+                checkuid=Integer.parseInt(pid);
             }catch (Exception e)
             {
                 objs.put("code","");
@@ -92,14 +92,14 @@ public class ReviewAPI
             }
             else
             {
-                objs.put("reviews",reviewService.findReviews(checkpid));
+                objs.put("reviews",reviewService.findReviews(checkuid));
                 objs.put("code","");
                 objs.put("message","success");
             }
         }
         else if(own.role==Role.shop)
         {
-            objs.put("reviews",reviewService.findReviews(checkpid));
+            objs.put("reviews",reviewService.findReviews(checkuid));
             objs.put("code","");
             objs.put("message","success");
         }
@@ -107,13 +107,13 @@ public class ReviewAPI
         {
             if(!oid.equals("")&&!pid.equals(""))
             {
-                objs.put("reviews",reviewService.findReview(checkoid,checkpid));
+                objs.put("reviews",reviewService.findReview(checkoid,checkuid));
                 objs.put("code","");
                 objs.put("message","success");
             }
             else if(!pid.equals(""))
             {
-                objs.put("reviews", reviewService.findReviews(checkpid));
+                objs.put("reviews", reviewService.findReviews(checkuid));
                 objs.put("code", "");
                 objs.put("message", "success");
             }

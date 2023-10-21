@@ -49,3 +49,30 @@ html
     width: auto;
     float: left;
 }
+
+
+.cell
+{
+    text-align: center;
+    word-break: break-all;
+}
+.test{
+    background: #fff8;
+}
+.test:hover
+{
+    background: #fff;
+}
+table
+{
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.change:hover
+{
+    background: #fff;
+}
+tbody tr:hover {
+    background: #fff;
+    transition: 0.5s;
+}

@@ -19,7 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
 <body class="broaden">
-<canvas></canvas>
+<!--<canvas></canvas>-->
 <div id="delivery" class="container">
     <var-sticky>
         <div class="Top-Bar">
@@ -27,13 +27,13 @@
                       style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
                        --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
                 <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="logout"><var-icon name="upload"/></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" ><var-icon name="plus"/></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" ><var-icon name="help-circle" /></var-tab>
             </var-tabs>
             <var-tabs class="Bar-Right"
                       style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem"
                       v-model:active="show">
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0"><var-icon name="home" /></var-tab>
-                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1"><var-icon name="notebook" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0" @click="Activity(0)"><var-icon name="home" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="Activity(1)"><var-icon name="notebook" /></var-tab>
             </var-tabs>
         </div>
     </var-sticky>
@@ -42,7 +42,7 @@
 
     <div v-if="show == 0" class="all">
         <div class="left" style="width: 20rem;height: 48.7rem;background: #2ecc71;text-align: center">
-            <img src="img/Test.png" class="img-info">
+            <img src="img/Test.png" alt="未加载图片" class="img-info" @click="UpdateUserImage">
             <div style="margin: 10rem 0 0 0"><h3>进入系统</h3></div>
         </div>
         <div class="left Main">
@@ -80,7 +80,7 @@
                 </div>
                 <div style="text-align: center">
                     <var-button text class="button--block" size="large" color="#2196f3ba" @click="UpdateUser">提交</var-button>
-                    <var-button text class="button--block" size="large" color="#2196f3ba">重置</var-button>
+                    <var-button text class="button--block" size="large" color="#2196f3ba" @click="">重置</var-button>
                 </div>
             </div>
         </div>
@@ -103,14 +103,42 @@
     <div v-if="show == 1" class="all">
         <div style="width: 45rem;height: 48.7rem;float: left;">
             <order-table-head style="width: 43rem;margin: 4rem 1rem 0;background: #0004"></order-table-head>
-            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>
+<!--            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>-->
+            <div class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" @scroll="LOrdersHandleScroll">
+                <table :style='`transform:translateY(${LOrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirLOrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.sid }}</td>
+                        <td style='text-align: center;width: 11rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='updateOrder(item.oid)'><var-icon name='cog' /></var-button></td>
+                        <td style='text-align: center;width: 9rem;word-break: break-all'><var-button text @click='deleteOrder(item.oid)'><var-icon name='delete' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div style="width: 6.6rem;height: 48.7rem;float: left;">
             <img style="width: 6.6rem;height: 8.7rem;margin: 19.5rem 0">
         </div>
         <div style="width: 58rem;height: 48.7rem;float: left;">
             <check-order-table-head style="width: 52rem;margin: 4rem 3rem 0;background: #0004"></check-order-table-head>
-            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>
+<!--            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>-->
+            <div class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" @scroll="ROrdersHandleScroll">
+                <table :style='`transform:translateY(${ROrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirROrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.sid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.tid }}</td>
+                        <td style='text-align: center;width: 8.7rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOwnReview(item.oid)'><var-icon name='message-processing-outline' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <var-popup position="center" style="height: 40rem;" v-model:show="orderFN">
             <div >
@@ -123,7 +151,7 @@
                 </div>
                 <listing-table-head style="width: 40rem;margin: 0 3rem;background: #0004"></listing-table-head>
                 <listing-table-body class="scroll" style="width: 40rem;height: 20rem;margin: 0 3rem;background: #0004" :listingshistory="listingshistory"></listing-table-body>
-                <!--                <var-button text style="width: 40rem;margin: 1rem 3rem" type="success">提交</var-button>-->
+<!--                                <var-button text style="width: 40rem;margin: 1rem 3rem" type="success">提交</var-button>-->
             </div>
         </var-popup>
     </div>
@@ -282,6 +310,7 @@
         data() {
             return {
                 "show": 0,
+                "pagedata": "user",
                 "time": Utils.getTime("hh:mm:ss"),
                 "day": new Date().toDateString(),
                 "SuccessText": false,
@@ -300,11 +329,126 @@
 
                 "orderFN": false,
                 "orders": [],
+                "LOrders": [],
+                "VirLOrders": [],
+                "LOrdersScrollH":0,
+                "LOrdersShowNum":0,
+                "LOrdersOffsetY":0,
+                "ROrder": [],
+                "VirROrders": [],
+                "ROrdersScrollH":0,
+                "ROrdersShowNum":0,
+                "ROrdersOffsetY":0,
             }
         },
         methods: {
-            UpdateUser() {},
+            Activity(TODO) {
+                if(TODO === 0) {
+                    this.pagedata = "user";
+                    this.user = API.getUser(this.uid,null,null,null);
+                } else if (TODO === 1) {
+                    this.pagedata = "orders";
+                    this.orders = API.getOrder(null,null).orders;
+                }
+            },
+            Refresh() {
+                if (this.pagedata === "user") {
+                    API.getUser(this.uid,null,null,(result) => {
+                        if(result.code === 0) {
+                            this.user = result.user;
+                            this.name = this.user.name;
+                            this.password = "";
+                            this.tel = this.user.tel;
+                            this.address = this.user.address;
+                            this.info = this.user.info;
+                        }
+                    })
+                } else if (this.pagedata === "orders") {
+                    API.getOrder(null,(result) => {
+                        if(result.code === 0) {
+                            this.orders=result.orders;
+                        }
+                    })
+                }
+            },
 
+            UpdateUser() {},
+            UpdateUserImage() {
+                var user=API.getUser(this.uid,null,null,null).user;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src="+ user.image + "'img' alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    user.image=result.fileName;
+                                    result = API.updateUser(user,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+
+            getOrderDetail(oid) {
+                this.order=API.getOrder(oid,null).order;
+                this.listingshistory=API.getListing(oid,null).listings;
+                this.orderFN=true;
+            },
+            LOrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.LOrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirLOrders=this.LOrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.LOrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+            ROrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ROrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirROrders=this.ROrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ROrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
             img(image) {
                 return "img/"+image;
             },
@@ -325,8 +469,32 @@
                 window.location.href = baseURL;
             },
         },
-        mounted(){
+        watch: {
+            orders(neworders,oldorders) {
+                this.LOrders=this.orders.filter((item)=>item.state==="received");
+                this.LOrdersOffsetY=0;
+                this.LOrdersScrollH=this.LOrders.length*(4*14);
+                this.LOrdersShowNum=Math.floor(38/4)+4;
+                this.VirLOrders=this.LOrders.slice(0,this.LOrdersShowNum);
+                this.ROrders=this.orders.filter((item)=>item.state!=="received");
+                this.ROrdersOffsetY=0;
+                this.ROrdersScrollH=this.ROrders.length*(4*14);
+                this.ROrdersShowNum=Math.floor(38/4)+4;
+                this.VirROrders=this.ROrders.slice(0,this.ROrdersShowNum);
+
+                this.ScrollTime=new Date().getTime();
+            },
+        },
+        mounted() {
             app=this;
+            this.timer=setInterval(()=>{
+                app.time=Utils.getTime("hh:mm:ss");
+            },1000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer);
+            }
         },
         components: {
             "OrderTableHead": {
@@ -334,7 +502,6 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>时间</th>" +
@@ -351,7 +518,6 @@
                     "<var-table>" +
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr v-if='item.state==\"unpaid\"'>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
@@ -372,7 +538,6 @@
                     "<var-table>" +
                     "    <thead>" +
                     "      <tr>" +
-                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
                     "        <th style='text-align: center;width: 50rem'>编号</th>" +
                     "        <th style='text-align: center;width: 50rem'>商家</th>" +
                     "        <th style='text-align: center;width: 50rem'>付款凭证</th>" +
@@ -390,13 +555,11 @@
                     "<var-table>" +
                     "    <tbody v-for='item in orders' :key='item.oid'>" +
                     "      <tr v-if='item.state!=\"unpaid\"'>" +
-                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.tid }}</td>" +
                     "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
                     "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOrderDetail(item.oid)'><var-button text><var-icon name='view' /></var-button></td>" +
-                    // "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOwnReview(item.oid)'><var-button text><var-icon name='message-processing-outline' /></var-button></td>" +
                     "        <td style='text-align: center;width: 15rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
                     "      </tr>" +
                     "    </tbody>" +
