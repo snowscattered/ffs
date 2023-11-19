@@ -41,6 +41,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public Review findReview_oid(int oid) { return reviewMapper.selectReviewByO(oid);}
+
+    @Override
     public int addReview(Review review) {
         if (review.score == null) {
             return -1;

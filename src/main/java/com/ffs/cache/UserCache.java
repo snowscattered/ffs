@@ -176,6 +176,11 @@ public class UserCache {
         return token;
     }
 
+    public static int getTokenNums()
+    {
+        return pool.size();
+    }
+
     /**
      * 透过 uid 删除缓存
      * 必须先使用工厂方法
@@ -214,6 +219,16 @@ public class UserCache {
 //            return;
 //        }
 //        pool.put(b, null);
+    }
+
+    public static synchronized void putUserIgnoreLock(User user)
+    {
+        delUser(user.uid);
+        put(user);
+    }
+    public static synchronized void remove(int uid)
+    {
+        delUser(uid);
     }
 }
 

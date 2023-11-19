@@ -45,6 +45,8 @@ public interface UserService {
      */
     List<User> findUsers(String name);
 
+    List<User> findUsers(Role role,String name);
+
     /**
      * 获取所有 user
      * @return 非 null 的 List<User> 引用

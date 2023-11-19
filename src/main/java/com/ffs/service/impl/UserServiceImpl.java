@@ -50,6 +50,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> findUsers(Role role,String name) {
+        List<User> users=userMapper.selectUsersByName(name);
+        users.removeIf(user -> user.role!=role);
+        return users;
+    }
+
+    @Override
     public List<User> findUsers() {
         return userMapper.selectUsers();
     }

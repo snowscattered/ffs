@@ -35,7 +35,7 @@ public interface ProductMapper {
     List<Product> selectProducts();
 
     @Insert("insert into product(uid,name,image,price,score,info,del) "
-            + "values(#{uid},#{name},#{image},#{price},0,#{info},0)")
+            + "values(#{uid},#{name},#{image},#{price},#{score},#{info},0)")
     int insertProduct(Product product);
 
     @Update("<script>"
@@ -54,4 +54,7 @@ public interface ProductMapper {
 
     @Update("update product set del=1 where del=0 and pid=#{pid}")
     int deleteProduct(int pid);
+
+    @Update("update product set del=1 where del=0 and uid=#{uid} and pid=#{pid}")
+    int deleteProductByUid(int uid, int pid);
 }

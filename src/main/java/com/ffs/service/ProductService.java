@@ -82,4 +82,6 @@ public interface ProductService {
      * @author hoshinosena
      */
     int delProduct(int pid);
+
+    int delProduct(int uid, int pid);
 }

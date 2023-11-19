@@ -1,6 +1,7 @@
 package com.ffs.service;
 
 import com.ffs.po.Order;
+import com.ffs.po.State;
 
 import java.util.List;
 
@@ -88,4 +89,6 @@ public interface OrderService {
      * @author hoshinosena
      */
     int delOrder(int oid);
+
+    List<Order> findOrdersByState(State state);
 }

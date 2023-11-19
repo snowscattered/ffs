@@ -102,4 +102,9 @@ public class ProductServiceImpl implements ProductService {
     public int delProduct(int pid) {
         return productMapper.deleteProduct(pid);
     }
+
+    @Override
+    public int delProduct(int uid, int pid) {
+        return productMapper.deleteProductByUid(uid, pid);
+    }
 }

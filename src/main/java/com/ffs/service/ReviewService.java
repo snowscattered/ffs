@@ -28,6 +28,8 @@ public interface ReviewService {
      */
     Review findReview(int oid, int uid);
 
+    Review findReview_oid(int oid);
+
     /**
      * 透过 uid 查找 review
      * @param uid user 的 uid 字段

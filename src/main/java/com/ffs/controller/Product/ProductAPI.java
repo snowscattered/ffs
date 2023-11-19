@@ -1,14 +1,18 @@
 package com.ffs.controller.Product;
 
-import com.ffs.cache.Info;
-import com.ffs.cache.TokenPool;
-import com.ffs.cache.UserCache;
+import com.ffs.controller.Generation.BaseParameter;
+import com.ffs.controller.User.UserAPI;
 import com.ffs.po.Product;
 import com.ffs.po.Role;
 import com.ffs.po.User;
 import com.ffs.service.ProductService;
+import com.ffs.util.helper.Assign;
+import com.ffs.util.helper.PageChunk;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,297 +21,370 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class Para
-{
-    public String uid;
-    public String name;
-    public String pid;
-    public String token;
-    public Product product;
-}
 /**
- * 针对商品的操作处理
- * @author snowscattered
+ * ProductAPI 处理 product 表的增删改查请求
+ * 仅 POST 方法
+ * @author hoshinosena
+ * @version 1.0
  */
 @Controller
-@RequestMapping("${baseURL}"+"api/product")
-public class ProductAPI
-{
+@RequestMapping("${baseURL}" + "api/product/")
+public class ProductAPI {
+    @Value("${selectBlockSize}")
+    int blockSize;
     @Autowired
     ProductService productService;
 
-
-    /**
-     * 查找 Product
-     * 当 role 为 admin 时,查看所有或者特定的商品
-     * 当 role 为 shop 时,查看所有或者指定自身的商品
-     * 当 role 为 delivery 时,查看订单列表里的商品
-     * 当 role 为 buyer 时,查看所有或者指定商家的所有商品
-     * @param para
-     * @return 返回相应的 json
-     * @author snowscattered
-     */
-    @RequestMapping("/get")
-    @ResponseBody
-    public Object getProduct(@RequestBody Para para)
-    {
-        Map<String, Object> objs = new LinkedHashMap<>();
-        String uid = para.uid == null ? "" : para.uid;
-        String name = para.name == null ? "" : para.name;
-        String pid = para.pid == null ? "" : para.pid;
-        String token=para.token==null? "" :para.token;
-        User own = UserCache.getUser(token);
-        if (own == null) {
-            objs.put("code", 10001);
-            objs.put("message", "非法操作1");
-            return objs;
-        }
-        //初始化可能会有问题
-        int checkuid = 0, checkpid = 0;
-        if (!uid.equals(""))
-        {
-            try
-            {
-                checkuid = Integer.parseInt(uid);
-            } catch (Exception e)
-            {
-                objs.put("code", 10012);
-                objs.put("message", "不正确的uid");
-                return objs;
-            }
-        }
-        if (!pid.equals(""))
-        {
-            try
-            {
-                checkpid = Integer.parseInt(pid);
-            } catch (Exception e)
-            {
-                objs.put("code", 10013);
-                objs.put("message", "不正确的pid");
-                return objs;
-            }
-        }
-        if (own.role == Role.admin)
-        {
-            if (uid.equals("") && pid.equals("") && name.equals(""))
-            {
-                objs.put("products", productService.findProducts());
-                objs.put("code", 0);
-                objs.put("message", "success");
-            } else if (!uid.equals(""))
-            {
-                objs.put("products", productService.findProducts(checkuid));
-                objs.put("code", 0);
-                objs.put("message", "success");
-            } else if (!name.equals(""))
-            {
-                objs.put("products", productService.findProducts(name));
-                objs.put("code", 0);
-                objs.put("message", "success");
-            } else if(!pid.equals(""))
-            {
-                objs.put("product", productService.findProduct(checkpid));
-                objs.put("code", 0);
-                objs.put("message", "success");
-            }
-        } else if (own.role == Role.shop)
-        {
-            if (pid.equals(""))
-            {
-                objs.put("products", productService.findProducts(own.uid));
-                objs.put("code", 0);
-                objs.put("message", "success");
-            } else
-            {
-                objs.put("product", productService.findProduct(checkpid));
-                objs.put("code", 0);
-                objs.put("message", "success");
-            }
-        } else if (own.role == Role.delivery)
-        {
-            objs.put("product", productService.findProduct(checkpid));
-            objs.put("code", 0);
-            objs.put("message", "success");
-        } else if(own.role==Role.buyer)
-        {
-            if(uid.equals(""))
-            {
-                objs.put("code", 10013);
-                objs.put("message","未选择商家");
-                return objs;
-            }
-            if(pid.equals("")&&name.equals(""))
-            {
-                objs.put("products",productService.findProducts(checkuid));
-                objs.put("code",0);
-                objs.put("message","success");
-            }
-            else if(!pid.equals(""))
-            {
-                Product product= productService.findProduct(checkpid);
-                objs.put("product",product.uid==checkuid?"":product);
-                objs.put("code",0);
-                objs.put("message","success");
-            }
-            else if(!name.equals(""))
-            {
-                List<Product> products=productService.findProducts(name);
-                for(Product product:products)
-                    if(product.uid!=checkuid)
-                        products.remove(product);
-                objs.put("products",products);
-                objs.put("code",0);
-                objs.put("message","success");
-            }
-        }
-        return objs;
+    private User preprocessingToken(BaseParameter p, Map<String, Object> r) {
+        return UserAPI.preprocessingToken(p, r);
     }
 
-    /**
-     * 添加 Product
-     * 仅当 role 为 admin 或者 shop 时有权添加商品
-     * @param para
-     * @return 返回相应的 json
-     * @author snowscattered
-     */
-    @RequestMapping("/add")
-    @ResponseBody
-    public Object addProduct(@RequestBody Para para)
-    {
-        Map<String, Object> objs = new LinkedHashMap<>();
-        Product product = para.product;
-        String token= para.token==null?"": para.token;
-        User own = UserCache.getUser(token);
-        if (own == null) {
-            objs.put("code", 10001);
-            objs.put("message", "非法操作1");
-            return objs;
+    private User shopAuthentication(Parameter p, Map<String, Object> r) {
+        User u = UserAPI.preprocessingToken(p, r);
+
+        if (u == null) {
+            return null;
+        }
+        // 非商户拒绝执行
+        if (!Role.shop.equals(u.role)) {
+            r.put("code", -20023);
+            r.put("message", "拒绝执行");
+            return null;
+        }
+        // uid 验证采取 int -> string 避免异常
+        if (p.uid != null && !(u.uid + "").equals(p.uid)) {
+            r.put("code", -20013);
+            r.put("message", "不正确的uid");
+            return null;
         }
 
-        if (own.role == Role.delivery || own.role == Role.buyer)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
-            return objs;
-        }
-        if (product == null)
-        {
-            objs.put("code", 10012);
-            objs.put("message", "product错误");
-            return objs;
-        }
-
-        //该函数有多个返回值
-        int status = productService.addProduct(product);
-        if (status == 1)
-        {
-            objs.put("code", 0);
-            objs.put("message", "success");
-        } else
-        {
-            objs.put("code", 10012);
-            objs.put("message", "product异常");
-        }
-        return objs;
+        return u;
     }
 
-    /**
-     * 查找 Product
-     * 仅当 role 为 admin 或者 shop 时有权更改商品
-     * @param para
-     * @return 返回相应的 json
-     * @author snowscattered
-     */
-    @RequestMapping("/update")
+    @PostMapping("/get")
     @ResponseBody
-    public Object updataProduct(@RequestBody Para para)
-    {
-        Map<String, Object> objs = new LinkedHashMap<>();
-        Product product = para.product;
-        String token= para.token==null?"": para.token;
-        User own = UserCache.getUser(token);
-        if (own == null) {
-            objs.put("code", 10001);
-            objs.put("message", "非法操作1");
-            return objs;
-        }
+    public Object getProduct(@RequestBody Parameter p) {
+        Map<String, Object> r = new LinkedHashMap<>();
 
-        if (own.role == Role.delivery || own.role == Role.buyer)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
-            return objs;
+        User user = preprocessingToken(p, r);
+        if (user == null) {
+            return r;
         }
-        if (product == null)
-        {
-            objs.put("code", 10015);
-            objs.put("message", "没有待修改商品");
-            return objs;
+        // 登陆用户都可以查
+        // 查询优先级 pid > uid > name > 全表查询(管理员)
+        if (p.pid != null) {
+            int pid;
+            Product pd;
+            // pid 错误
+            try {
+                pid = Integer.parseInt(p.pid);
+            } catch (Exception e) {
+                r.put("code", -21011);
+                r.put("message", "不正确的pid");
+                return r;
+            }
+            pd = productService.findProduct(pid);
+            if (pd == null) {
+                r.put("code", -21011);
+                r.put("message", "不存在该商品");
+                return r;
+            }
+            // uid 验证采取 int -> string 避免异常
+            if (p.uid != null && !(pd.uid + "").equals(p.uid)) {
+                r.put("code", -21002);
+                r.put("message", "不正确的uid");
+                return r;
+            }
+            r.put("code", 0);
+            r.put("message", "success");
+            r.put("product", pd);
+            return r;
         }
+        if (p.uid != null) {
+            int uid;
+            // uid错误
+            try {
+                uid = Integer.parseInt(p.uid);
+            } catch (Exception e) {
+                r.put("code", -21011);
+                r.put("message", "不正确的uid");
+                return r;
+            }
+            if (p.name != null) {
+                PageInfo<Product> pageInfo = PageChunk.chunk(p.block, blockSize,  new Assign<>() {
+                    @Override
+                    public List<Product> assign() {
+                        List<Product> products=productService.findProducts(uid);
+                        products.removeIf(product -> !product.name.contains(p.name));
+                        return products;
+                    }
+                });
 
-        //该函数有多个返回值
-        int status = productService.updProduct(product);
-        if (status == 1)
-        {
-
-            objs.put("code", 0);
-            objs.put("message", "success");
-        } else
-        {
-            objs.put("code", 10012);
-            objs.put("message", "product异常");
+                r.put("code", 0);
+                r.put("message", "success");
+                r.put("products", pageInfo.getList());
+                r.put("block", pageInfo.getPageNum());
+                r.put("blocks", pageInfo.getPages());
+                return r;
+            }
+            PageInfo<Product> pageInfo = PageChunk.chunk(p.block, blockSize, new Assign<>() {
+                @Override
+                public List<Product> assign() {
+                    return productService.findProducts(uid);
+                }
+            });
+            r.put("code", 0);
+            r.put("message", "success");
+            r.put("products", pageInfo.getList());
+            r.put("block", pageInfo.getPageNum());
+            r.put("blocks", pageInfo.getPages());
+            return r;
         }
-        return objs;
+        if (p.name != null) {
+            PageInfo<Product> pageInfo = PageChunk.chunk(p.block, blockSize,  new Assign<>() {
+                @Override
+                public List<Product> assign() {
+                    return productService.findProducts(p.name);
+                }
+            });
+            r.put("code", 0);
+            r.put("message", "success");
+            r.put("products", pageInfo.getList());
+            r.put("block", pageInfo.getPageNum());
+            r.put("blocks", pageInfo.getPages());
+            return r;
+        }
+        // 全表查询
+        // 非管理员拒绝执行
+        if (!Role.admin.equals(user.role)) {
+            r.put("code", -21002);
+            r.put("message", "拒绝执行");
+            return r;
+        }
+        PageInfo<Product> pageInfo = PageChunk.chunk(p.block, blockSize, new Assign<>() {
+            @Override
+            public List<Product> assign() {
+                return productService.findProducts();
+            }
+        });
+        r.put("code", 0);
+        r.put("message", "success");
+        r.put("products", pageInfo.getList());
+        r.put("block", pageInfo.getPageNum());
+        r.put("blocks", pageInfo.getPages());
+        return r;
     }
 
-    /**
-     * 查找 Product
-     * 仅当 role 为 admin 或者 shop 时有权删除商品
-     * @param para
-     * @return 返回相应的 json
-     * @author snowscattered
-     */
-    @RequestMapping("/delete")
+    @PostMapping("/add")
     @ResponseBody
-    public Object deleteProduct(@RequestBody Para para)
-    {
-        Map<String, Object> objs = new LinkedHashMap<>();
-        String pid = para.pid == null ? "" : para.pid;
-        String token= para.token==null?"": para.token;
-        User own = UserCache.getUser(token);
-        if (own == null) {
-            objs.put("code", 10001);
-            objs.put("message", "非法操作1");
-            return objs;
+    public Object addProduct(@RequestBody Parameter p) {
+        Map<String, Object> r = new LinkedHashMap<>();
+
+        User user = shopAuthentication(p, r);
+        if (user == null) {
+            return r;
+        }
+        // 检查本地 image 文件
+        if (p.image != null) {
+
+        }
+        Double price;
+        Product pd = new Product();
+        // price 错误
+        try {
+            price = Double.parseDouble(p.price);
+        } catch (Exception e) {
+            r.put("code", -22051);
+            r.put("message", "不正确的价格");
+            return r;
+        }
+        pd.score=0;
+        pd.uid = user.uid;
+        pd.name = p.name;
+        pd.image = p.image;
+        pd.price = price;
+        pd.info = p.info;
+        System.out.println(p.score);
+        try {
+            pd.score=Integer.parseInt(p.score);
+        }catch (Exception e) {
+            e.printStackTrace();
+            r.put("code", -22061);
+            r.put("message", "不正确的评分");
+            return r;
+        }
+        int code = productService.addProduct(pd);
+        switch (code) {
+            case 1: {
+                r.put("code", 0);
+                r.put("message", "success");
+                // 姑且先用这样, 后边再改
+                List<Product> pds = productService.findProducts(pd.uid);
+                r.put("pid", pds.get(0).pid);
+                break;
+            } case 0: {
+                r.put("code", -50005);
+                r.put("message", "不存在该商品");
+                break;
+            } case -1: {
+                r.put("code", -22031);
+                r.put("message", "错误的名称");
+                break;
+            } default: {
+                r.put("code", -22051);
+                r.put("message", "错误的价格");
+            }
         }
 
-        if (own.role == Role.delivery || own.role == Role.buyer)
-        {
-            objs.put("code", 10011);
-            objs.put("message", "非法操作");
-            return objs;
-        }
-
-        int checkpid;
-        try
-        {
-            checkpid = Integer.parseInt(pid);
-        } catch (Exception e)
-        {
-            objs.put("code", 10013);
-            objs.put("message", "不正确的pid");
-            return objs;
-        }
-        if (productService.delProduct(checkpid) == 0)
-        {
-            objs.put("code", 10012);
-            objs.put("message", "product异常");
-        } else
-        {
-            objs.put("code", 0);
-            objs.put("message", "success");
-        }
-        return objs;
+        return r;
     }
+
+    @PostMapping("/upd")
+    @ResponseBody
+    public Object updProduct(@RequestBody Parameter p) {
+        Map<String, Object> r = new LinkedHashMap<>();
+
+        User user = shopAuthentication(p, r);
+        if (user == null) {
+            return r;
+        }
+        // 检查本地 image 文件
+        if (p.image != null) {
+
+        }
+        int pid;
+        Double price = null;
+        Product pd = new Product();
+        // pid 错误
+        try {
+            pid = Integer.parseInt(p.pid);
+        } catch (Exception e) {
+            r.put("code", -23011);
+            r.put("message", "不正确的pid");
+            return r;
+        }
+        // price 检查
+        if (p.price != null) {
+            // price 错误
+            try {
+                price = Double.parseDouble(p.price);
+            } catch (Exception e) {
+                r.put("code", -23051);
+                r.put("message", "不正确的价格");
+                return r;
+            }
+        }
+        pd.pid = pid;
+        pd.uid = user.uid;
+        pd.name = p.name;
+        pd.image = p.image;
+        pd.price = price;
+        pd.info = p.info;
+        int code = productService.updProduct(pd);
+        switch (code) {
+            case 1: {
+                r.put("code", 0);
+                r.put("message", "success");
+                // 姑且先用这样, 后边再改
+                List<Product> pds = productService.findProducts(pd.uid);
+                r.put("pid", pds.get(0).pid);
+                break;
+            } case 0: {
+                r.put("code", -23011);
+                r.put("message", "不存在该商品");
+                break;
+            } case -1: {
+                r.put("code", -23031);
+                r.put("message", "错误的名称");
+                break;
+            } default: {
+                r.put("code", -23051);
+                r.put("message", "错误的价格");
+            }
+        }
+
+        return r;
+    }
+
+    @PostMapping("/del")
+    @ResponseBody
+    public Object delProduct(@RequestBody Parameter p) {
+        Map<String, Object> r = new LinkedHashMap<>();
+
+        User user = preprocessingToken(p, r);
+        if (user == null) {
+            return r;
+        }
+        // 管理员删除逻辑
+        if (Role.admin.equals(user.role)) {
+            int code;
+            int pid;
+            // pid 错误
+            try {
+                pid = Integer.parseInt(p.pid);
+            } catch (Exception e) {
+                r.put("code", -24011);
+                r.put("message", "不正确的pid");
+                return r;
+            }
+            if (p.uid == null) {
+                code = productService.delProduct(pid);
+            } else {
+                int uid;
+                // uid 错误
+                try {
+                    uid = Integer.parseInt(p.uid);
+                } catch (Exception e) {
+                    r.put("code", -24001);
+                    r.put("message", "不正确的uid");
+                    return r;
+                }
+                code = productService.delProduct(uid, pid);
+            }
+            if (code == 0) {
+                r.put("code", -24011);
+                r.put("message", "不存在该商品");
+                return r;
+            }
+            r.put("code", 0);
+            r.put("message", "success");
+            return r;
+        }
+        // 商户删除逻辑
+        user = shopAuthentication(p, r);
+        if (user == null) {
+            return r;
+        }
+        int code;
+        int pid;
+        // pid 错误
+        try {
+            pid = Integer.parseInt(p.pid);
+        } catch (Exception e) {
+            r.put("code", -24011);
+            r.put("message", "不正确的pid");
+            return r;
+        }
+        code = productService.delProduct(user.uid, pid);
+        if (code == 0) {
+            r.put("code", -21011);
+            r.put("message", "不存在该商品");
+            return r;
+        }
+
+        r.put("code", 0);
+        r.put("message", "success");
+        return r;
+    }
+}
+
+class Parameter extends BaseParameter {
+    public String block;
+    public String pid;
+    public String uid;
+    public String name;
+    public String image;
+    public String price;
+    public String info;
+    public String score;
 }

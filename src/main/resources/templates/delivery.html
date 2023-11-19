@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>delivery</title>
+    <link rel="stylesheet" type="text/css" href="css/delivery.css">
+    <link rel="stylesheet" type="text/css" href="css/general.css">
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-confirm-min.css">
+    <script src="js/jquery-1.9.1-min.js"></script>
+    <script src="js/jquery.cookie-1.4.1-min.js"></script>
+    <script src="js/jquery-confirm-min.js"></script>
+    <script src="js/vue-3.3.4-global-min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- 桌面端兼容 -->
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/touch-emulator/iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@varlet/ui/umd/varlet.js"></script>
+<body class="broaden">
+<div id="delivery" class="container">
+    <var-sticky>
+        <div class="Top-Bar">
+            <var-tabs class="Bar-Left"
+                      style="--tabs-indicator-background:rgb(255,255,255,0);--tabs-item-horizontal-height:100%;
+                       --tabs-background:rgb(255,255,255,0);--tabs-padding: 0.5rem">
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="logout"><var-icon name="upload"/></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="about"><var-icon name="help-circle" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" @click="deleteUser"><var-icon name="delete" /></var-tab>
+            </var-tabs>
+            <var-tabs class="Bar-Right"
+                      style="--tabs-item-horizontal-height:100%;--tabs-background:rgb(255,255,255,0.3);--tabs-padding: 0.5rem"
+                      v-model:active="show">
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="0" @click="Activity(0)"><var-icon name="home" /></var-tab>
+                <var-tab style="--tab-font-size:2rem;--tab-padding:2rem" name="1" @click="Activity(1)"><var-icon name="notebook" /></var-tab>
+            </var-tabs>
+        </div>
+    </var-sticky>
+    <success v-model:show="SuccessText"></success>
+    <error v-model:show="ErrorText" :code="code" :message="message"></error>
+
+    <div v-if="show == 0" class="all">
+        <div class="left" style="width: 20rem;height: 48.7rem;background: #2ecc7188;text-align: center">
+            <img :src="img(image)" alt="未加载图片" class="img-info" @click="UpdateUserImage">
+            <div style="margin: 10rem 0 0 0"><h3>欢迎{{ name }}骑手进入系统</h3></div>
+        </div>
+        <div class="left Main">
+            <div class="title"><h1>修改与查看个人信息</h1></div>
+            <div>
+                <h1 class="left sign">aaa</h1>
+                <div class="input--block">
+                    <var-input readonly style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="UID" size="small" v-model="uid"/>
+                </div>
+                <div class="input--block">
+                    <var-input readonly style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="账号" size="small" v-model="username"/>
+                </div>
+                <div class="input--block">
+                    <var-input style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="姓名" size="small" v-model="name"/>
+                </div>
+                <div class="input--block">
+                    <var-input style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="密码" size="small" v-model="password"/>
+                </div>
+                <div class="input--block">
+                    <var-input style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="电话" size="small" v-model="tel"/>
+                </div>
+                <div class="input--block">
+                    <var-input style="width: 40rem;--field-decorator-focus-color:#000b;--field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="地址" size="small" v-model="address"/>
+                </div>
+                <div class="input--block">
+                    <var-input textarea style="width: 40rem;--input-textarea-height:5rem;--field-decorator-focus-color:#000b;
+                               --field-decorator-blur-color:#0008;--field-decorator-text-color:#000"
+                               variant="outlined" placeholder="备注" size="small" v-model="info"/>
+                </div>
+                <div style="text-align: center">
+                    <var-button text class="button--block" size="large" color="#2196f3ba" @click="UpdateUser">提交</var-button>
+                    <var-button text class="button--block" size="large" color="#2196f3ba" @click="">重置</var-button>
+                </div>
+            </div>
+        </div>
+        <div style="width: 25rem;height: 48.7rem;float: left;background: #0004">
+            <div>
+                <var-date-picker v-model="day" readonly
+                                 style="--date-picker-title-padding:0.5rem;--date-picker-height:27rem;
+                                 --date-picker-title-background:#0000;--date-picker-body-background-color:#0000"/>
+            </div>
+            <div>
+                <var-time-picker v-model="time" readonly use-seconds
+                                 style="--time-picker-clock-container-height:13rem;--time-picker-clock-container-width: 13rem;
+                                 --time-picker-height:21.5rem;--time-picker-title-padding:0.5rem;
+                                 --time-picker-title-background:#0000;--time-picker-body-background:#0000"/>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="show == 1" class="all">
+        <div style="width: 45rem;height: 48.7rem;float: left;">
+            <order-table-head style="width: 43rem;margin: 4rem 1rem 0;background: #0004"></order-table-head>
+<!--            <order-table-body class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" :orders="orders"></order-table-body>-->
+            <div class="scroll" style="width: 43rem;height: 38rem;margin: 0 1rem;background: #0004" @scroll="LOrdersHandleScroll">
+                <table :style='`transform:translateY(${LOrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirLOrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'>{{ item.sa }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 8.6rem;word-break: break-all'><var-button text @click='deliveringOrder(item.oid)'><var-icon name='cog' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div style="width: 6.6rem;height: 48.7rem;float: left;">
+            <img style="width: 6.6rem;height: 8.7rem;margin: 19.5rem 0">
+        </div>
+        <div style="width: 58rem;height: 48.7rem;float: left;">
+            <check-order-table-head style="width: 52rem;margin: 4rem 3rem 0;background: #0004"></check-order-table-head>
+<!--            <check-order-table-body class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" :orders="orders"></check-order-table-body>-->
+            <div class="scroll" style="width: 52rem;height: 38rem;margin: 0 3rem;background: #0004" @scroll="ROrdersHandleScroll">
+                <table :style='`transform:translateY(${ROrdersOffsetY}px)`'>
+                    <tbody style="height: 4rem;" v-for='item in VirROrders' :key='item.oid'>
+                    <tr>
+                        <td style='text-align: center;width: 10.4rem;word-break: break-all'>{{ item.oid }}</td>
+                        <td style='text-align: center;width: 10.4rem;word-break: break-all'>{{ item.sa }}</td>
+                        <td style='text-align: center;width: 10.4rem;word-break: break-all'>{{ item.date }}</td>
+                        <td style='text-align: center;width: 10.4rem;word-break: break-all'><var-button text @click='getOrderDetail(item.oid)'><var-icon name='view' /></var-button></td>
+                        <td style='text-align: center;width: 10.4rem;word-break: break-all'><var-button text @click='finishOrder(item.oid)' :disabled="item.state === 'finish'"><var-icon name='cog' /></var-button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <var-popup position="center" style="width: 35rem;height: 40rem;" v-model:show="orderFN">
+            <div >
+                <div style="margin: 1rem 3rem 0">
+                    <h3 v-show="order.bn !== null">买家名:{{ order.bn }}</h3><br/>
+                    <h3 v-show="order.bt !== null">买家地址:{{ order.bt }}</h3><br/>
+                    <h3 v-show="order.ba !== null">买家地址:{{ order.ba }}</h3><br/>
+                    <h3 v-show="order.sn !== null">商家名:{{ order.sn }}</h3><br/>
+                    <h3 v-show="order.st !== null">商家电话:{{ order.st }}</h3><br/>
+                    <h3 v-show="order.sa !== null">商家地址:{{ order.sa }}</h3><br/>
+                    <h3 v-show="order.dn !== null">骑手名:{{ order.dn }}</h3><br/>
+                    <h3 v-show="order.dt !== null">骑手电话:{{ order.dt }}</h3><br/>
+                    <h3 v-show="order.state !== null">订单状态:{{ order.state }}</h3><br/>
+                    <h3>备注:<var-ellipsis style="width: 30rem">{{ order.info }}</var-ellipsis></h3><br/>
+                </div>
+<!--                <listing-table-head style="width: 40rem;margin: 0 3rem;background: #0004"></listing-table-head>-->
+<!--                <listing-table-body class="scroll" style="width: 40rem;height: 20rem;margin: 0 3rem;background: #0004" :listingshistory="listingshistory"></listing-table-body>-->
+<!--                                <var-button text style="width: 40rem;margin: 1rem 3rem" type="success">提交</var-button>-->
+            </div>
+        </var-popup>
+    </div>
+</div>
+<script>
+    var { createApp }=Vue;
+    var baseURL = API.baseURL =$.cookie("baseURL");
+    var app
+    var container = createApp({
+        data() {
+            return {
+                "show": 0,
+                "pagedata": "user",
+                "time": Utils.getTime("hh:mm:ss"),
+                "day": new Date().toDateString(),
+                "SuccessText": false,
+                "ErrorText": false,
+                "code": 0,
+                "message": "",
+
+                "token": $.cookie("token"),
+                "uid": $.cookie("uid"),
+                "name": $.cookie("name"),
+                "username": $.cookie("username"),
+                "password": "",
+                "image": $.cookie("image"),
+                "tel": $.cookie("tel"),
+                "address": $.cookie("address"),
+                "info": $.cookie("info"),
+
+                "orderFN": false,
+                "LOrders": [],
+                "VirLOrders": [],
+                "LOrdersScrollH":0,
+                "LOrdersShowNum":0,
+                "LOrdersOffsetY":0,
+                "ROrders": [],
+                "VirROrders": [],
+                "ROrdersScrollH":0,
+                "ROrdersShowNum":0,
+                "ROrdersOffsetY":0,
+            }
+        },
+        methods: {
+            Activity(TODO) {
+                if(TODO === 0) {
+                    this.pagedata = "user";
+                    API.getUser(this.uid, null, null, (result)=>{
+                        if(result.code === 0) {
+                            app.user = result.user;
+                        }
+                    });
+                } else if (TODO === 1) {
+                    this.pagedata = "orders";
+                    this.LOrders = API.getOrder(null, null, null, null).orders;
+                    this.ROrders = API.getOrder(null, null, this.uid, null).orders;
+                }
+            },
+            Refresh() {
+                if (this.pagedata === "user") {
+                    API.getUser(this.uid, null, null,(result) => {
+                        if(result.code === 0) {
+                            app.name = $.cookie("name");
+                            app.password = "";
+                            app.image = $.cookie("image");
+                            app.tel = $.cookie("tel");
+                            app.address = $.cookie("address");
+                            app.info = $.cookie("info");
+                        }
+                    })
+                } else if (this.pagedata === "orders") {
+                        this.LOrders = API.getOrder(null, null, null, null).orders;
+                        this.ROrders = API.getOrder(null, null, this.uid, null).orders;
+                }
+            },
+
+            UpdateUser() {
+                var user={};
+                user.uid=$.cookie("uid");
+                user.username=this.username;
+                user.name=this.name;
+                user.password=this.password;
+                user.tel=this.tel;
+                user.address=this.address;
+                user.info=this.info;
+                var result=API.updateUser(user,null);
+                if (result.code === 0) {
+                    $.cookie("name", user.name);
+                    $.cookie("tel", user.tel);
+                    $.cookie("address", user.address);
+                    $.cookie("info", user.info);
+                    app.SuccessText = true;
+                    app.Refresh();
+                } else {
+                    app.code = result.code;
+                    app.message = result.message;
+                    app.ErrorText = true;
+                }
+            },
+            UpdateUserImage() {
+                // var obj;
+                // $.ajax({
+                //     type: "POST",
+                //     url: this.baseURL + "upload_image",
+                //     async: false,
+                //     contentType: "application/json",
+                //     data: JSON.stringify({
+                //         "token": $.cookie("token")}),
+                //     timeout: 2000,
+                //     dataType: "json",
+                //     success: function (data) {
+                //         obj = data
+                //     },
+                //     complete: function (XMLHttpRequest, textStatus) {
+                //         if (textStatus === "success") {
+                //             return obj;
+                //         } else if (textStatus === "timeout") {
+                //             obj = {"code": -1, "message": "超时"};
+                //         } else {
+                //             obj = {"code": -1, "message": "客户端错误"};
+                //         }
+                //     }
+                // })
+                // if (obj.code !== 0) {
+                //     app.code = result.code;
+                //     app.message = result.message;
+                //     app.ErrorText = true;
+                //     return;
+                // }
+                // var key = obj.key;
+                var user=API.getUser(this.uid ,null ,null ,null).user;
+                $.confirm({
+                    title: "更换图片",
+                    content:
+                        "<div>" +
+                        "<div><h3>原图片:</h3></div>" +
+                        "<div><img src="+ app.img(user.image) +" alt='图片加载失败'/></div>" +
+                        "<input type='file' id='file' value='上传新图片' accept='image/*' onchange='app.input(this)'/>" +
+                        "<div><h3>新图片:</h3></div>" +
+                        "<div><img id='img' src='' alt='' /></div>" +
+                        "</div>",
+                    buttons: {
+                        confirm: {
+                            text: "确认",
+                            action: function() {
+                                var file;
+                                var result;
+                                file=document.getElementById("file");
+                                result = API.Upload(file);
+                                if (result.code === 0) {
+                                    user.image=result.fileName;
+                                    result = API.updateUser(user,null);
+                                    if(result.code === 0) {
+                                        app.SuccessText = true;
+                                    } else {
+                                        app.code = result.code;
+                                        app.message = result.message;
+                                        app.ErrorText = true;
+                                    }
+                                    $.cookie("image",user.image);
+                                    app.Refresh();
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        },
+                    },
+                    boxWidth: "30%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5
+                })
+            },
+
+            getOrderDetail(oid) {
+                this.order=API.getOrder(oid, null, null, null).order;
+                this.orderFN=true;
+            },
+            deliveringOrder(oid) {
+                var order = {
+                    "token": $.cookie("token"),
+                    "state": "delivering",
+                    "oid": oid}
+                API.updateOrder(order, (result) => {
+                    if(result.code === 0) {
+                        app.SuccessText = true;
+                    } else {
+                        app.code = result.code;
+                        app.message = result.message;
+                        app.ErrorText = true;
+                    }
+                    app.Refresh();
+                });
+            },
+            finishOrder(oid) {
+                var order = {
+                    "token": $.cookie("token"),
+                    "state": "finish",
+                    "oid": oid}
+                API.updateOrder(order, (result) => {
+                    if(result.code === 0) {
+                        app.SuccessText = true;
+                    } else {
+                        app.code = result.code;
+                        app.message = result.message;
+                        app.ErrorText = true;
+                    }
+                    app.Refresh();
+                });
+            },
+            LOrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.LOrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirLOrders=this.LOrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.LOrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+            ROrdersHandleScroll(e) {
+                if(new Date().getTime()-this.ScrollTime>10) {
+                    var scrollTop=e.target.scrollTop;
+                    this.ROrdersOffsetY=scrollTop-(scrollTop%(4*14));
+                    this.VirROrders=this.ROrders.slice(
+                        Math.floor(scrollTop/(4*14)),
+                        Math.floor(scrollTop/(4*14))+this.ROrdersShowNum
+                    )
+                    this.ScrollTime=new Date().getTime();
+                }
+            },
+
+            deleteUser() {
+                $.alert({
+                    title: "销户",
+                    content:
+                        "<div style='width: 100%'>" +
+                        "<div style='width: 100%'>" +
+                        "<h3 style='display: inline'>这将</h3>" +
+                        "<h2 style='color: red;display: inline'>不可逆</h2>" +
+                        "<h3 style='display: inline'>进行销户。</h3>" +
+                        "</div>" +
+                        "<div><h3>确认要继续执行吗?</h3></div>" +
+                        "</div>",
+                    buttons:{
+                        confirm: {
+                            text: "删除",
+                            btnClass: "btn-red",
+                            action: function() {
+                                var result = API.deleteUser(app.uid,null);
+                                if (result.code === 0) {
+                                    alert("成功");
+                                    $.ajax({
+                                        type: "POST",
+                                        url: baseURL + "to_logout",
+                                        // 阻塞线程避免登出数据与
+                                        // 访问根的请求到达次序不同
+                                        data: JSON.stringify({
+                                            "token":$.cookie("token"),
+                                        }),
+                                        contentType: "application/json",
+                                        dataType: "json",
+                                        async: false
+                                    });
+                                    var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+                                    if (keys) {
+                                        for (var i = keys.length; i--;)
+                                            document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString() + ";path=/;";
+                                    }
+                                    sessionStorage.clear();
+                                    window.location.href = baseURL;
+                                } else {
+                                    app.code = result.code;
+                                    app.message = result.message;
+                                    app.ErrorText = true;
+                                }
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    },
+                    boxWidth: "25%",
+                    useBootstrap: false,
+                    theme: "material",
+                    animationBounce: 1.5,
+                })
+            },
+            input(fileDom) {
+                if (window.FileReader) {
+                    var reader = new FileReader();
+                } else {
+                    alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+                }
+                var file = fileDom.files[0];
+                var imageType = /^image\//;
+                if (!imageType.test(file.type)) {
+                    alert("请选择图片！");
+                    return;
+                }
+                reader.onload = function (e) {
+                    var img = document.getElementById("img");
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+            img(image) {
+                if(image==="Test.png")
+                    return "img/"+image;
+                return "/image/"+image;
+            },
+            logout() {
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "to_logout",
+                    // 阻塞线程避免登出数据与
+                    // 访问根的请求到达次序不同
+                    data: JSON.stringify({
+                        "token":$.cookie("token"),
+                    }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    async: false
+                });
+                var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+                if (keys) {
+                    for (var i = keys.length; i--;)
+                        document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString() + ";path=/;";
+                }
+                sessionStorage.clear();
+                window.location.href = baseURL;
+            },
+            about() {window.open($.cookie("baseURL") + "about.html");},
+        },
+        watch: {
+            LOrders(newLOrders,oldLOrders) {
+                this.LOrdersOffsetY=0;
+                this.LOrdersScrollH=this.LOrders.length*(4*14);
+                this.LOrdersShowNum=Math.floor(38/4)+4;
+                this.VirLOrders=this.LOrders.slice(0,this.LOrdersShowNum);
+                this.ScrollTime=new Date().getTime();
+            },
+            ROrders(newROrders,oldROrders) {
+                this.ROrdersOffsetY=0;
+                this.ROrdersScrollH=this.ROrders.length*(4*14);
+                this.ROrdersShowNum=Math.floor(38/4)+4;
+                this.VirROrders=this.ROrders.slice(0,this.ROrdersShowNum);
+                this.ScrollTime=new Date().getTime();
+            },
+        },
+        mounted() {
+            app=this;
+            this.timer=setInterval(()=>{
+                app.time=Utils.getTime("hh:mm:ss");
+            },1000)
+        },
+        beforeDestroy() {
+            if(this.timer) {
+                clearInterval(this.timer);
+            }
+        },
+        components: {
+            "OrderTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商家名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>时间</th>" +
+                    "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
+                    "        <th style='text-align: center;width: 50rem'>配送</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>"
+            },
+            "OrderTableBody": {
+                props: ["orders"],
+                template:
+                    "<var-table>" +
+                    "    <tbody v-for='item in orders' :key='item.oid'>" +
+                    "      <tr v-if='item.state==\"unpaid\"'>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
+                    "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOrderDetail(item.oid)'><var-button text><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 15rem;word-break: break-all'><var-button text><var-icon name='cog' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 15rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "  </var-table>",
+                methods: {
+                    getOrderDetail(oid) {
+                        app.getOrderDetail(oid);
+                    }
+                },
+            },
+            "CheckOrderTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商家名</th>" +
+                    "        <th style='text-align: center;width: 50rem'>时间</th>" +
+                    "        <th style='text-align: center;width: 50rem'>详细信息</th>" +
+                    // "        <th style='text-align: center;width: 50rem'>发表评论</th>" +
+                    "        <th style='text-align: center;width: 50rem'>完成</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>",
+            },
+            "CheckOrderTableBody": {
+                props: ["orders"],
+                template:
+                    "<var-table>" +
+                    "    <tbody v-for='item in orders' :key='item.oid'>" +
+                    "      <tr v-if='item.state!=\"unpaid\"'>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.oid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.sid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.tid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.date }}</td>" +
+                    "        <td style='text-align: center;width: 15rem;word-break: break-all' @click='getOrderDetail(item.oid)'><var-button text><var-icon name='view' /></var-button></td>" +
+                    "        <td style='text-align: center;width: 15rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "  </var-table>",
+                methods: {
+                    getOrderDetail(oid) {
+                        app.getOrderDetail(oid);
+                    },
+                    getOwnReview(oid){
+                        app.getOwnReview(oid);
+                    },
+                },
+            },
+            "ListingTableHead": {
+                template:
+                    "<var-table>" +
+                    "    <thead>" +
+                    "      <tr>" +
+                    "        <th style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></th>" +
+                    "        <th style='text-align: center;width: 50rem'>编号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>商品号</th>" +
+                    "        <th style='text-align: center;width: 50rem'>数量</th>" +
+                    "        <th style='text-align: center;width: 50rem'>删除</th>" +
+                    "      </tr>" +
+                    "    </thead>" +
+                    "</var-table>",
+            },
+            "ListingTableBody": {
+                props: ["listingshistory"],
+                template:
+                    "<var-table>" +
+                    "    <tbody v-for='item in listingshistory' :key='item.lid'>" +
+                    "      <tr>" +
+                    "        <td style='text-align: center;width: 3.5rem'><var-checkbox></var-checkbox></td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.lid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.pid }}</td>" +
+                    "        <td style='text-align: center;width: 50rem;word-break: break-all'>{{ item.amount }}</td>" +
+                    "        <td style='text-align: center;width: 30rem;word-break: break-all'><var-button text><var-icon name='delete' /></var-button></td>" +
+                    "      </tr>" +
+                    "    </tbody>" +
+                    "</var-table>",
+            },
+
+            "success": {
+                template:
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='success' title='成功' description='提交成功'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='success' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.SuccessText=!app.SuccessText;
+                    }
+                }
+            },
+            "error": {
+                props: ["code","message"],
+                template:
+                    "        <var-popup :default-style='false'>" +
+                    "          <var-result class='result' style='width: 28.5rem' type='error' title='错误' description='提交失败'>" +
+                    "            <template #footer>" +
+                    "              <div style='text-align: center;margin: 0 0 2rem 0'>" +
+                    "                  <h3>错误代码:{{ code }}&emsp;&emsp;&emsp;错误信息:{{ message }}</h3><br/>" +
+                    "              </div>" +
+                    "              <div style='text-align: center'>" +
+                    "                  <var-button type='danger' @click='change'>知道了</var-button>" +
+                    "              </div>" +
+                    "            </template>" +
+                    "          </var-result>" +
+                    "        </var-popup>",
+                methods: {
+                    change() {
+                        app.ErrorText=!app.ErrorText;
+                    }
+                }
+            },
+        },
+    })
+    container.use(Varlet).mount("#delivery")
+</script>
+</body>
+</html>

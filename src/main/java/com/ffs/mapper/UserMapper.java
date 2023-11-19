@@ -44,7 +44,7 @@ public interface UserMapper {
     List<User> selectUsers();
 
     @Insert("insert into user(role,username,password,name,image,tel,address,info,del) "
-            + "values(#{_role},#{user.username},#{user.password},#{user.name},#{user.image}#{user.tel},#{user.address},#{user.info},0)")
+            + "values(#{_role},#{user.username},#{user.password},#{user.name},#{user.image},#{user.tel},#{user.address},#{user.info},0)")
     int insertUser(User user, int _role);
 
     @Update("<script>"

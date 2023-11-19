@@ -26,6 +26,9 @@ public interface ReviewMapper {
     @Select("select * from review where del=0 order by rid desc")
     List<Review> selectReviews();
 
+    @Select("select * from review where del=0 and oid=#{oid}")
+    Review selectReviewByO(int oid);
+
     @Insert("insert into review(oid,uid,score,detail,date,del) "
             + "values(#{oid},#{uid},#{score},#{detail},#{date},0)")
     int insertReview(Review review);

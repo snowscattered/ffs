@@ -1,7 +1,5 @@
 package com.ffs.controller.Listing;
 
-import com.ffs.cache.Info;
-import com.ffs.cache.TokenPool;
 import com.ffs.cache.UserCache;
 import com.ffs.po.Listing;
 import com.ffs.po.Role;
@@ -54,7 +52,7 @@ public class ListingAPI
         String token= para.token==null?"": para.token;
         User own = UserCache.getUser(token);
         if (own == null) {
-            objs.put("code", 10001);
+            objs.put("code", -1);
             objs.put("message", "非法操作1");
             return objs;
         }

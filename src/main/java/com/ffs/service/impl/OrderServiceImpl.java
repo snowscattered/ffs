@@ -2,6 +2,7 @@ package com.ffs.service.impl;
 
 import com.ffs.mapper.OrderMapper;
 import com.ffs.po.Order;
+import com.ffs.po.State;
 import com.ffs.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,5 +82,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public int delOrder(int oid) {
         return orderMapper.deleteOrder(oid);
+    }
+
+    @Override
+    public List<Order> findOrdersByState(State state) {
+        List<Order> orders=orderMapper.selectOrders();
+        orders.removeIf(order -> order.state!=state);
+        return orders;
     }
 }

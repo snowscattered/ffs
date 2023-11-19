@@ -38,8 +38,12 @@ public interface OrderMapper {
     @Result(property="state", column="state", typeHandler=EnumOrdinalTypeHandler.class)
     List<Order> selectOrders();
 
-    @Insert("insert into _order(state,bid,sid,did,tid,date,info,del) "
-            + "values(0,#{bid},#{sid},null,'',#{date},#{info},0)")
+//    @Insert("insert into _order(state,bid,sid,did,tid,date,info,del) "
+//            + "values(0,#{bid},#{sid},null,#{tid},#{date},#{info},0)")
+//    int insertOrder(Order order);
+
+    @Insert("insert into _order(state,bid,sid,did,tid,date,info,bn,bt,ba,sn,st,sa,dn,dt,del)"
+            + "values(0,#{bid},#{sid},null,#{tid},#{date},#{info},#{bn},#{bt},#{ba},#{sn},#{st},#{sa},#{dn},#{dt},0)")
     int insertOrder(Order order);
 
     @Update("<script>"
@@ -50,6 +54,14 @@ public interface OrderMapper {
             +     "<if test=\"order.did != null\">did=#{order.did},</if>"
             +     "<if test=\"order.tid != null\">tid=#{order.tid},</if>"
             +     "<if test=\"order.info != null\">info=#{order.info},</if>"
+            +     "<if test=\"order.bn != null\">bn=#{order.bn},</if>"
+            +     "<if test=\"order.bt != null\">bt=#{order.bt},</if>"
+            +     "<if test=\"order.ba != null\">ba=#{order.ba},</if>"
+            +     "<if test=\"order.sn != null\">sn=#{order.sn},</if>"
+            +     "<if test=\"order.st != null\">st=#{order.st},</if>"
+            +     "<if test=\"order.sa != null\">sa=#{order.sa},</if>"
+            +     "<if test=\"order.dn != null\">dn=#{order.dn},</if>"
+            +     "<if test=\"order.dt != null\">dt=#{order.dt},</if>"
             + "</set>"
             + "<where>"
             +     "del=0 and oid=#{order.oid}"

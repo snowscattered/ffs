@@ -23,6 +23,21 @@ info varchar(50),
 # 删除标志位
 del tinyint);
 
+create table product(
+pid int primary key auto_increment,
+uid int,
+name varchar(10),
+# 使用 uuid(32字符) 作为地址
+image char(32),
+price float,
+# 最低10分(1.0)
+# 默认0分表示没有评价
+score tinyint,
+info varchar(50),
+# 删除标志位
+del tinyint,
+foreign key(uid) references user(uid));
+
 create table _order(
 oid int primary key auto_increment,
 # 交易状态(未支付,支付,商家已接单,骑手已取得,配送完了)
@@ -39,26 +54,20 @@ did int,
 tid varchar(50),
 date datetime,
 info varchar(50),
+bn varchar(25),
+bt varchar(20),
+ba varchar(50),
+sn varchar(25),
+st varchar(20),
+sa varchar(50),
+dn varchar(25),
+dt varchar(20),
 # 删除标志位
 del tinyint,
 foreign key(bid) references user(uid),
 foreign key(sid) references user(uid),
-foreign key(did) references user(uid));
-
-create table product(
-pid int primary key auto_increment,
-uid int,
-name varchar(10),
-# 使用 uuid(32字符) 作为地址
-image char(32),
-price float,
-# 最低10分(1.0)
-# 默认0分表示没有评价
-score tinyint,
-info varchar(50),
-# 删除标志位
-del tinyint,
-foreign key(uid) references user(uid));
+foreign key(did) references user(uid)
+);
 
 create table review(
 rid int primary key auto_increment,
